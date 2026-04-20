@@ -1,0 +1,53 @@
+# ---- Python / Django ----
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Environnements virtuels
+.env
+.venv
+venv/
+env/
+ENV/
+
+# Packages / builds
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Fichiers Django courants
+db.sqlite3
+media/
+staticfiles/
+static_root/
+collectstatic/
+
+# Logs
+*.log
+log/
+logs/
+
+# Outils de tests
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.pytest_cache/
+
+# IDE / éditeurs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+docker-volumes/
+debug_csv/
+*.csv
+data/
+
+# Migration Django
+# migrations/
