@@ -1,0 +1,23 @@
+<div style="padding: 24px; font-family: Arial, sans-serif;">
+  <div *ngIf="loading">Chargement...</div>
+
+  <div *ngIf="!loading && error" style="color: red;">
+    {{ error }}
+  </div>
+
+  <div *ngIf="!loading && user">
+    <h2>Bonjour {{ user.name || 'Utilisateur' }}</h2>
+
+    <div style="margin-top: 12px;">
+      <div><b>Mail:</b> {{ user.mail || '-' }}</div>
+      <div><b>Sub:</b> {{ user.sub || '-' }}</div>
+    </div>
+
+    <button
+      (click)="logout()"
+      style="margin-top: 20px; padding: 10px 14px; cursor: pointer;"
+    >
+      Déconnexion
+    </button>
+  </div>
+</div>

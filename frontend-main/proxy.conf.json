@@ -1,0 +1,11 @@
+{
+  "/api": {
+    "target": "http://127.0.0.1:9080",
+    "secure": false,
+    "changeOrigin": true,
+    "cookieDomainRewrite": "127.0.0.3",
+    "headers": {
+      "Cookie": "sessionid=0iwxwcxacdkkaasinuiy3hoj9mo9qlr1"
+    }
+  }
+}

@@ -1,0 +1,78 @@
+// src/app/shared/components/field-select/field-select.component.scss
+
+.field-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.field-label {
+  display: block;
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: #616f89;
+}
+
+.field-required {
+  color: #e53e3e;
+  margin-left: 2px;
+}
+
+.field-value {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #111318;
+}
+
+.select-wrapper {
+  position: relative;
+}
+
+.field-select {
+  display: block;
+  width: 100%;
+  padding: 0.625rem 2.5rem 0.625rem 1rem;
+  font-size: 0.84rem;
+  font-weight: 400;
+  font-family: 'Inter', sans-serif;
+  color: #111318;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.61rem;
+  appearance: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  cursor: pointer;
+  box-sizing: border-box;
+
+  &:focus {
+    outline: none;
+    border-color: #0052FF;
+    box-shadow: 0 0 0 3px rgba(0, 82, 255, 0.1);
+  }
+
+  &--error {
+    border-color: #e53e3e;
+
+    &:focus {
+      border-color: #e53e3e;
+      box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
+    }
+  }
+}
+
+.select-arrow {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.25rem;
+  color: #616f89;
+  pointer-events: none;
+}
+
+.field-error {
+  font-size: 0.69rem;
+  color: #e53e3e;
+  margin-top: -0.15rem;
+}

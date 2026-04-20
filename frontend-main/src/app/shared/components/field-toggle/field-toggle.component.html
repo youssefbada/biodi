@@ -1,0 +1,31 @@
+<!-- src/app/shared/components/field-toggle/field-toggle.component.html -->
+<div class="toggle-card" [class.toggle-card--readonly]="!editing">
+  <div class="toggle-info">
+    <h3 class="toggle-title">{{ label }}</h3>
+    @if (description) {
+      <p class="toggle-desc">{{ description }}</p>
+    }
+  </div>
+
+  @if (editing) {
+    <label class="toggle-switch" [for]="controlName">
+      <input
+        type="checkbox"
+        class="toggle-checkbox"
+        [id]="controlName"
+        [formControl]="control"
+      />
+      <span class="toggle-track">
+        <span class="toggle-thumb"></span>
+      </span>
+    </label>
+  } @else {
+    <span class="toggle-badge" [class.toggle-badge--active]="currentValue === true">
+      {{ currentValue === true ? 'Oui' : currentValue === false ? 'Non' : '—' }}
+    </span>
+  }
+</div>
+
+@if (serverError) {
+  <span class="field-error">{{ serverError }}</span>
+}

@@ -1,0 +1,32 @@
+<!-- src/app/shared/components/field-select/field-select.component.html -->
+<div class="field-wrapper">
+  <label class="field-label" [for]="controlName">
+    {{ label }}
+    @if (required && editing) {
+      <span class="field-required">*</span>
+    }
+  </label>
+
+  @if (editing) {
+    <div class="select-wrapper">
+      <select
+        class="field-select"
+        [class.field-select--error]="showError"
+        [id]="controlName"
+        [formControl]="control"
+      >
+        <option value="">— Sélectionner —</option>
+        @for (opt of options; track opt.value) {
+          <option [value]="opt.value">{{ opt.label }}</option>
+        }
+      </select>
+      <span class="material-icons select-arrow">expand_more</span>
+    </div>
+
+    @if (showError) {
+      <span class="field-error">{{ errorMessage }}</span>
+    }
+  } @else {
+    <span class="field-value">{{ displayValue }}</span>
+  }
+</div>

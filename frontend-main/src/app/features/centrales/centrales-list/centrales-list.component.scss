@@ -1,0 +1,11 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
+
+// Tous les styles génériques viennent de styles.scss (global)
+// Ici uniquement ce qui est spécifique à cette page
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}

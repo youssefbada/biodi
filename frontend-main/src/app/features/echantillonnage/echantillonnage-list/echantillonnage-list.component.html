@@ -1,0 +1,210 @@
+<div class="page-layout">
+  <app-sidebar></app-sidebar>
+
+  <div class="page-content">
+    <app-header [breadcrumbs]="breadcrumbs"></app-header>
+
+    <main class="main">
+
+      <div class="page-header">
+        <div class="page-title-block">
+          <h1 class="page-title">Échantillonnage</h1>
+          <p class="page-subtitle">Consultez et gérez les données d'échantillonnage.</p>
+        </div>
+        <div class="page-actions">
+          @if (authService.isAdmin) {
+            <button class="btn btn-outline" (click)="onDownloadTemplate()">
+              <img src="assets/icons/download.svg" class="btn-icon" alt=""/>
+              Télécharger le modèle
+            </button>
+            <button class="btn btn-outline" (click)="onOpenImport()">
+              <img src="assets/icons/upload.svg" class="btn-icon" alt=""/>
+              Importer
+            </button>
+            <a [routerLink]="['/echantillonnage/nouveau']" class="btn btn-primary">
+              <img src="assets/icons/add.svg" class="btn-icon btn-icon--white" alt=""/>
+              Ajouter un échantillonnage
+            </a>
+          }
+        </div>
+      </div>
+
+      <!-- Filtres -->
+      <div class="filters-card">
+        <div class="filters-grid">
+          <div class="filter-group">
+            <label class="filter-label">Recherche</label>
+            <div class="search-wrapper">
+              <img src="assets/icons/search.svg" class="search-icon" alt=""/>
+              <input
+                type="text"
+                class="form-input"
+                placeholder="Rechercher (site, date, espèce)..."
+                [(ngModel)]="searchTerm"
+                (ngModelChange)="onSearchChange()"/>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label">Groupe</label>
+            <select class="form-select" [(ngModel)]="selectedGroupe" (ngModelChange)="onFilterChange()">
+              @for (option of groupeOptions; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label">Fréquence d'occurrence</label>
+            <select class="form-select" [(ngModel)]="selectedFrequence" (ngModelChange)="onFilterChange()">
+              @for (option of frequenceOptions; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Erreur -->
+      @if (errorMessage) {
+        <div class="error-banner">
+          <img src="assets/icons/error.svg" class="error-icon" alt=""/>
+          {{ errorMessage }}
+        </div>
+      }
+
+      <!-- Tableau -->
+      <div class="table-card">
+        <div class="table-wrapper">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>N°</th>
+                <th>Site / Centrale</th>
+                <th>Date</th>
+                <th>Groupe</th>
+                <th>Espèce piégée</th>
+                <th>Fréquence</th>
+                <th class="text-center">Nb échantillonnage</th>
+                <th class="text-center">Total individus</th>
+                <th class="text-right th-actions">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (isLoading) {
+                @for (i of [1,2,3,4,5]; track i) {
+                  <tr>
+                    <td><div class="skeleton skeleton--sm"></div></td>
+                    <td><div class="skeleton"></div></td>
+                    <td><div class="skeleton skeleton--sm"></div></td>
+                    <td><div class="skeleton skeleton--sm"></div></td>
+                    <td><div class="skeleton"></div></td>
+                    <td><div class="skeleton skeleton--sm"></div></td>
+                    <td><div class="skeleton skeleton--sm"></div></td>
+                    <td><div class="skeleton skeleton--sm"></div></td>
+                    <td><div class="skeleton skeleton--sm"></div></td>
+                  </tr>
+                }
+              }
+
+              @if (!isLoading) {
+                @for (item of itemsPage; track item.id_echantillonnage) {
+                  <tr class="table-row" style="cursor:pointer"
+                      (click)="router.navigate(['/echantillonnage', item.id_echantillonnage])">
+                    <td class="td-secondary">{{ item.id_echantillonnage }}</td>
+                    <td class="td-site">{{ item.centrale_label || '—' }}</td>
+                    <td class="td-secondary">{{ item.date_echantillonnage || '—' }}</td>
+                    <td>
+                      <span class="badge" [ngClass]="getBadgeClass(item.groupe)">
+                        {{ item.groupe || '—' }}
+                      </span>
+                    </td>
+                    <td class="td-secondary">
+                      {{ item.poisson_label || item.non_poisson_label || '—' }}
+                    </td>
+                    <td class="td-secondary">{{ item.frequence_occurrence || '—' }}</td>
+                    <td class="text-center">{{ item.nombre_echantillonnage ?? '—' }}</td>
+                    <td class="text-center">{{ item.totaux_nombre_individus ?? '—' }}</td>
+                    <td class="text-right td-actions">
+                      <div class="actions-group" (click)="$event.stopPropagation()">
+                        <button class="action-btn action-btn--view" title="Voir"
+                          [routerLink]="['/echantillonnage', item.id_echantillonnage]">
+                          <img src="assets/icons/visibility.svg" class="action-icon" alt="voir"/>
+                        </button>
+                        @if (authService.isAdmin) {
+                          <button class="action-btn action-btn--edit" title="Modifier"
+                            [routerLink]="['/echantillonnage', item.id_echantillonnage, 'modifier']">
+                            <img src="assets/icons/edit.svg" class="action-icon" alt="modifier"/>
+                          </button>
+                          <button class="action-btn action-btn--delete" title="Supprimer"
+                            (click)="onDelete(item)">
+                            <img src="assets/icons/delete.svg" class="action-icon" alt="supprimer"/>
+                          </button>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                }
+
+                @if (itemsPage.length === 0) {
+                  <tr>
+                    <td colspan="9" class="empty-state">
+                      <img src="assets/icons/search-off.svg" class="empty-icon" alt=""/>
+                      <p>Aucun échantillonnage trouvé</p>
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-bar">
+          <span class="pagination-info">
+            Affichage de <strong>{{ startItem }}</strong> à
+            <strong>{{ endItem }}</strong> sur
+            <strong>{{ totalCount }}</strong> résultats
+          </span>
+          <div class="pagination-controls">
+            <button class="page-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
+              <img src="assets/icons/chevron-left.svg" class="chevron-icon" alt=""/>
+            </button>
+            @for (page of pages; track page) {
+              <button class="page-btn" [class.page-btn--active]="page === currentPage" (click)="goToPage(page)">
+                {{ page }}
+              </button>
+            }
+            <button class="page-btn" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">
+              <img src="assets/icons/chevron-right.svg" class="chevron-icon" alt=""/>
+            </button>
+          </div>
+          <button class="btn btn-outline btn--sm" (click)="onExportCsv()">
+            <img src="assets/icons/download.svg" class="btn-icon" alt=""/>
+            Exporter CSV
+          </button>
+        </div>
+      </div>
+
+    </main>
+
+    @if (showImportModal()) {
+      <app-import-modal
+        title="Importer des échantillonnages (Excel)"
+        [columnMappings]="columnMappings"
+        [createFn]="createFn"
+        (closed)="onCloseImport()"
+        (importDone)="onImportDone()">
+      </app-import-modal>
+    }
+
+    @if (itemToDelete) {
+      <app-confirm-delete-modal
+        [itemName]="getItemLabel(itemToDelete)"
+        (cancel)="onCancelDelete()"
+        (confirm)="onConfirmDelete()">
+      </app-confirm-delete-modal>
+    }
+
+  </div>
+</div>

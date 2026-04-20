@@ -1,0 +1,166 @@
+<div class="page-layout">
+  <app-sidebar></app-sidebar>
+
+  <div class="page-content">
+    <app-header [breadcrumbs]="breadcrumbs"></app-header>
+
+    <main class="main">
+
+      @if (loading) {
+        <div class="skeleton-header"></div>
+      } @else if (error || !item) {
+        <div class="error-state">Non-poisson introuvable.</div>
+      } @else {
+
+        <div class="detail-header">
+          <div class="detail-header__left">
+            <div class="detail-header__title-row">
+              <h1 class="detail-title">
+                {{ item.nom_commun || (item.genre + ' ' + item.espece) }}
+              </h1>
+              @if (editing) {
+                <span class="badge-edition">Mode Édition</span>
+              }
+            </div>
+            <p class="detail-subtitle">{{ item.genre }} {{ item.espece }} — {{ item.groupe }}</p>
+          </div>
+          <div class="detail-header__actions">
+            @if (!editing) {
+              @if (authService.isAdmin) {
+                <button class="btn btn-primary" (click)="startEdit()">
+                  <img src="assets/icons/edit.svg" class="btn-icon btn-icon--white" alt=""/>
+                  Modifier
+                </button>
+              }
+            } @else {
+              <button class="btn btn-outline-accent" (click)="cancelEdit()" [disabled]="saving">Annuler</button>
+              <button class="btn btn-primary" (click)="saveEdit()" [disabled]="saving || !hasChanges || form.invalid">
+                @if (saving) {
+                  <span class="material-symbols-outlined btn-icon spinning">progress_activity</span>
+                  Enregistrement…
+                } @else {
+                  Enregistrer
+                }
+              </button>
+            }
+          </div>
+        </div>
+
+        @if (saved) {
+          <div class="toast-success">
+            <span class="material-symbols-outlined">check_circle</span>
+            Modifications enregistrées avec succès
+          </div>
+        }
+
+        <nav class="tab-bar">
+          <button class="tab-btn" [class.active]="activeTab === 'identite'" (click)="setTab('identite')">Identité</button>
+          <button class="tab-btn" [class.active]="activeTab === 'ecologie'" (click)="setTab('ecologie')">Écologie & Statut</button>
+          <button class="tab-btn" [class.active]="activeTab === 'nage'" (click)="setTab('nage')">Nage & Résistances</button>
+        </nav>
+
+        <form [formGroup]="form">
+          <div class="tab-panel">
+
+            <!-- ONGLET 1 : Identité -->
+            @if (activeTab === 'identite') {
+              <div class="two-columns">
+                <div class="column">
+                  <app-section-header title="Identification"></app-section-header>
+                  <div class="fields-stack">
+                    <app-field-input label="Nom commun" controlName="nom_commun" [formGroup]="form" [editing]="editing"></app-field-input>
+                    <app-field-input label="Genre" controlName="genre" [formGroup]="form" [editing]="editing"></app-field-input>
+                    <app-field-input label="Espèce" controlName="espece" [formGroup]="form" [editing]="editing"></app-field-input>
+                    <app-field-input label="Famille" controlName="famille" [formGroup]="form" [editing]="editing"></app-field-input>
+                    <app-field-select label="Groupe" controlName="groupe" [formGroup]="form" [editing]="editing" [options]="groupeOptions"></app-field-select>
+                  </div>
+                </div>
+                <div class="column">
+                  <app-section-header title="Classification"></app-section-header>
+                  <div class="fields-stack">
+                    <app-field-select label="Guilde écologique" controlName="guilde_ecologique" [formGroup]="form" [editing]="editing" [options]="guildeEcoOptions"></app-field-select>
+                    <app-field-input label="Source guilde écologique" controlName="source_guilde_ecolo" [formGroup]="form" [editing]="editing"></app-field-input>
+                    <app-field-select label="Répartition colonne eau" controlName="repartition_colonne_eau" [formGroup]="form" [editing]="editing" [options]="repartitionOptions"></app-field-select>
+                    <app-field-input label="Source répartition" controlName="source_repartition_col_eau" [formGroup]="form" [editing]="editing"></app-field-input>
+                    <app-field-select label="Guilde trophique" controlName="guilde_trophique" [formGroup]="form" [editing]="editing" [options]="guildeTrophiqueOptions"></app-field-select>
+                    <app-field-input label="Source guilde trophique" controlName="source_guilde_trophique" [formGroup]="form" [editing]="editing"></app-field-input>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- ONGLET 2 : Écologie & Statut -->
+            @if (activeTab === 'ecologie') {
+              <div class="two-columns">
+                <div class="column">
+                  <app-section-header title="Écologie"></app-section-header>
+                  <div class="fields-stack">
+                    <app-field-toggle label="Enjeu halieutique" controlName="enjeu_halieutique" [formGroup]="form" [editing]="editing"></app-field-toggle>
+                    <app-field-input label="Source enjeu halieutique" controlName="source_enjeu_halieutique" [formGroup]="form" [editing]="editing"></app-field-input>
+                    <app-field-select label="État du stock" controlName="etat_stock" [formGroup]="form" [editing]="editing" [options]="etatStockOptions"></app-field-select>
+                    <app-field-input label="Source état stock" controlName="source_stock" [formGroup]="form" [editing]="editing"></app-field-input>
+                    <app-field-select label="Statut de protection" controlName="statut_protection" [formGroup]="form" [editing]="editing" [options]="statutProtectionOptions"></app-field-select>
+                    <app-field-input label="Source protection" controlName="source_protection" [formGroup]="form" [editing]="editing"></app-field-input>
+                  </div>
+                </div>
+                <div class="column">
+                  <app-section-header title="Conservation"></app-section-header>
+                  <div class="fields-stack">
+                    <app-field-select label="Conservation FR" controlName="conservation_fr" [formGroup]="form" [editing]="editing" [options]="conservationOptions"></app-field-select>
+                    <app-field-select label="Conservation EU" controlName="conservation_eu" [formGroup]="form" [editing]="editing" [options]="conservationOptions"></app-field-select>
+                    <app-field-select label="Conservation MD" controlName="conservation_md" [formGroup]="form" [editing]="editing" [options]="conservationOptions"></app-field-select>
+                    <app-field-input label="Source conservation" controlName="source_conservation" [formGroup]="form" [editing]="editing"></app-field-input>
+                  </div>
+                  <app-section-header title="Sensibilités"></app-section-header>
+                  <div class="fields-stack">
+                    <app-field-select label="Sensibilité lumière" controlName="sensibilite_lumiere" [formGroup]="form" [editing]="editing" [options]="sensibiliteLumiereOptions"></app-field-select>
+                    <app-field-input label="Source sensibilité lumière" controlName="source_sens_lumiere" [formGroup]="form" [editing]="editing"></app-field-input>
+                    <app-field-select label="Sensibilité courant" controlName="sensibilite_courants_eau" [formGroup]="form" [editing]="editing" [options]="sensibiliteCourantOptions"></app-field-select>
+                    <app-field-input label="Source sensibilité courant" controlName="source_sens_courant" [formGroup]="form" [editing]="editing"></app-field-input>
+                    <app-field-input label="Sensibilité sonore" controlName="sensibilite_sonore" [formGroup]="form" [editing]="editing"></app-field-input>
+                    <app-field-input label="Source sensibilité sonore" controlName="source_sens_sonore" [formGroup]="form" [editing]="editing"></app-field-input>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- ONGLET 3 : Nage & Résistances -->
+            @if (activeTab === 'nage') {
+              <div class="two-columns">
+                <div class="column">
+                  <app-section-header title="Résistances"></app-section-header>
+                  <div class="fields-stack">
+                    <app-field-select label="Résistance mécanique" controlName="resistance_chocs_mecaniques" [formGroup]="form" [editing]="editing" [options]="resistanceOptions"></app-field-select>
+                    <app-field-select label="Résistance chimique" controlName="resistance_chocs_chimiques" [formGroup]="form" [editing]="editing" [options]="resistanceOptions"></app-field-select>
+                    <app-field-select label="Résistance thermique" controlName="resistance_chocs_thermiques" [formGroup]="form" [editing]="editing" [options]="resistanceOptions"></app-field-select>
+                    <app-field-input label="Source résistances" controlName="source_resistance_chocs" [formGroup]="form" [editing]="editing"></app-field-input>
+                  </div>
+                </div>
+                <div class="column">
+                  <app-section-header title="Capacités de nage"></app-section-header>
+                  <div class="fields-stack">
+                    <app-field-input label="Endurance" controlName="endurance" [formGroup]="form" [editing]="editing"></app-field-input>
+                    <app-field-input label="Source endurance" controlName="source_endurance" [formGroup]="form" [editing]="editing"></app-field-input>
+                    <app-field-input label="Vitesse nage min" controlName="vitesse_nage_min_ms" [formGroup]="form" [editing]="editing" type="number" unit="m/s"></app-field-input>
+                    <app-field-input label="Vitesse nage moyenne" controlName="vitesse_nage_moy_ms" [formGroup]="form" [editing]="editing" type="number" unit="m/s"></app-field-input>
+                    <app-field-input label="Vitesse nage max" controlName="vitesse_nage_max_ms" [formGroup]="form" [editing]="editing" type="number" unit="m/s"></app-field-input>
+                    <app-field-input label="Source vitesse nage" controlName="source_vitesse_nage" [formGroup]="form" [editing]="editing"></app-field-input>
+                  </div>
+                </div>
+              </div>
+            }
+
+          </div>
+        </form>
+      }
+    </main>
+  </div>
+
+  @if (confirmLeaveService.showModal()) {
+    <app-confirm-leave-modal
+      (cancel)="confirmLeaveService.respond('cancel')"
+      (discard)="confirmLeaveService.respond('discard')"
+      (save)="confirmLeaveService.respond('save')">
+    </app-confirm-leave-modal>
+  }
+</div>

@@ -1,0 +1,44 @@
+<!-- src/app/shared/components/field-input/field-input.component.html -->
+<div class="field-wrapper">
+  <label class="field-label" [for]="controlName">
+    {{ label }}
+    @if (required && editing) {
+      <span class="field-required">*</span>
+    }
+  </label>
+
+  @if (editing) {
+    @if (type === 'textarea') {
+      <textarea
+        class="field-input field-textarea"
+        [class.field-input--error]="showError"
+        [id]="controlName"
+        [formControl]="control"
+        [placeholder]="placeholder"
+        [rows]="rows"
+      ></textarea>
+    } @else {
+      <div class="input-group" [class.has-unit]="unit">
+        <input
+          class="field-input"
+          [class.field-input--error]="showError"
+          [id]="controlName"
+          [type]="type"
+          [formControl]="control"
+          [placeholder]="placeholder"
+        />
+        @if (unit) {
+          <span class="input-unit" [class.input-unit--error]="showError">{{ unit }}</span>
+        }
+      </div>
+    }
+
+    @if (showError) {
+      <span class="field-error">{{ errorMessage }}</span>
+    }
+  } @else {
+    <span class="field-value" [class.field-value--notes]="type === 'textarea'">
+      {{ displayValue }}
+    </span>
+  }
+</div>

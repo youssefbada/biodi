@@ -1,0 +1,189 @@
+<div class="page-layout">
+  <app-sidebar></app-sidebar>
+
+  <div class="page-content">
+    <app-header [breadcrumbs]="breadcrumbs"></app-header>
+
+    <main class="main">
+
+      @if (loading) {
+        <div class="skeleton-header"></div>
+      } @else {
+
+        <div class="detail-header">
+          <div class="detail-header__left">
+            <div class="detail-header__title-row">
+              <h1 class="detail-title">
+                {{ isEdit ? 'Modifier le poisson' : 'Nouveau poisson' }}
+              </h1>
+            </div>
+            @if (isEdit) {
+              <p class="detail-subtitle">Modification des données</p>
+            }
+          </div>
+          <div class="detail-header__actions">
+            <button class="btn btn-outline-accent" (click)="onCancel()" [disabled]="saving">
+              Annuler
+            </button>
+            <button class="btn btn-primary" (click)="onSubmit()" [disabled]="saving || form.invalid">
+              @if (saving) {
+                <img src="assets/icons/progress_activity.svg" class="btn-icon spinning" alt=""/>
+                Enregistrement…
+              } @else {
+                <img src="assets/icons/save.svg" class="btn-icon btn-icon--white" alt=""/>
+                Enregistrer
+              }
+            </button>
+          </div>
+        </div>
+
+        <nav class="tab-bar">
+          <button class="tab-btn" [class.active]="activeTab === 'identite'" (click)="setTab('identite')">Identité</button>
+          <button class="tab-btn" [class.active]="activeTab === 'ecologie'" (click)="setTab('ecologie')">Écologie & Statut</button>
+          <button class="tab-btn" [class.active]="activeTab === 'biologie'" (click)="setTab('biologie')">Biologie & Morphologie</button>
+          <button class="tab-btn" [class.active]="activeTab === 'nage'" (click)="setTab('nage')">Capacités de nage</button>
+        </nav>
+
+        <form [formGroup]="form">
+          <div class="tab-panel">
+
+            <!-- ONGLET 1 : Identité -->
+            @if (activeTab === 'identite') {
+              <div class="two-columns">
+                <div class="column">
+                  <app-section-header title="Identification"></app-section-header>
+                  <div class="fields-stack">
+                    <app-field-input label="Nom commun" controlName="nom_commun" [formGroup]="form" [editing]="true" [required]="true"></app-field-input>
+                    <app-field-input label="Genre" controlName="genre" [formGroup]="form" [editing]="true"></app-field-input>
+                    <app-field-input label="Espèce" controlName="espece" [formGroup]="form" [editing]="true"></app-field-input>
+                    <app-field-input label="Famille" controlName="famille" [formGroup]="form" [editing]="true"></app-field-input>
+                  </div>
+                </div>
+                <div class="column">
+                  <app-section-header title="Classification"></app-section-header>
+                  <div class="fields-stack">
+                    <app-field-select label="Guilde écologique" controlName="guilde_ecologique" [formGroup]="form" [editing]="true" [options]="guildeEcoOptions"></app-field-select>
+                    <app-field-input label="Source guilde écologique" controlName="source_guilde_ecolo" [formGroup]="form" [editing]="true"></app-field-input>
+                    <app-field-select label="Répartition colonne eau" controlName="repartition_colonne_eau" [formGroup]="form" [editing]="true" [options]="repartitionOptions"></app-field-select>
+                    <app-field-input label="Source répartition" controlName="source_repartition_col_eau" [formGroup]="form" [editing]="true"></app-field-input>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- ONGLET 2 : Écologie & Statut -->
+            @if (activeTab === 'ecologie') {
+              <div class="two-columns">
+                <div class="column">
+                  <app-section-header title="Écologie"></app-section-header>
+                  <div class="fields-stack">
+                    <app-field-select label="Guilde trophique" controlName="guilde_trophique" [formGroup]="form" [editing]="true" [options]="guildeTrophiqueOptions"></app-field-select>
+                    <app-field-input label="Source guilde trophique" controlName="source_guilde_trophique" [formGroup]="form" [editing]="true"></app-field-input>
+                    <app-field-toggle label="Intérêt halieutique" controlName="interet_halieutique" [formGroup]="form" [editing]="true"></app-field-toggle>
+                    <app-field-input label="Source intérêt halieutique" controlName="source_interet_halieutique" [formGroup]="form" [editing]="true"></app-field-input>
+                    <app-field-select label="État du stock" controlName="etat_stock" [formGroup]="form" [editing]="true" [options]="etatStockOptions"></app-field-select>
+                    <app-field-input label="Source état stock" controlName="source_etat_stock" [formGroup]="form" [editing]="true"></app-field-input>
+                  </div>
+                </div>
+                <div class="column">
+                  <app-section-header title="Protection & Conservation"></app-section-header>
+                  <div class="fields-stack">
+                    <app-field-select label="Statut de protection" controlName="statut_protection" [formGroup]="form" [editing]="true" [options]="statutProtectionOptions"></app-field-select>
+                    <app-field-input label="Source protection" controlName="source_protection" [formGroup]="form" [editing]="true"></app-field-input>
+                    <app-field-select label="Conservation FR" controlName="conservation_fr" [formGroup]="form" [editing]="true" [options]="conservationOptions"></app-field-select>
+                    <app-field-select label="Conservation EU" controlName="conservation_eu" [formGroup]="form" [editing]="true" [options]="conservationOptions"></app-field-select>
+                    <app-field-select label="Conservation MD" controlName="conservation_md" [formGroup]="form" [editing]="true" [options]="conservationOptions"></app-field-select>
+                    <app-field-input label="Source conservation" controlName="source_conservation" [formGroup]="form" [editing]="true"></app-field-input>
+                  </div>
+                </div>
+              </div>
+
+              <div class="two-columns mt-section">
+                <div class="column">
+                  <app-section-header title="Sensibilités"></app-section-header>
+                  <div class="fields-stack">
+                    <app-field-select label="Sensibilité lumière" controlName="sensibilite_lumiere" [formGroup]="form" [editing]="true" [options]="sensibiliteLumiereOptions"></app-field-select>
+                    <app-field-input label="Source sensibilité lumière" controlName="source_sens_lumiere" [formGroup]="form" [editing]="true"></app-field-input>
+                    <app-field-select label="Sensibilité courant" controlName="sensibilite_courants_eau" [formGroup]="form" [editing]="true" [options]="sensibiliteCourantOptions"></app-field-select>
+                    <app-field-input label="Source sensibilité courant" controlName="source_sens_courant" [formGroup]="form" [editing]="true"></app-field-input>
+                    <app-field-input label="Sensibilité sonore" controlName="sensibilite_sonore" [formGroup]="form" [editing]="true"></app-field-input>
+                    <app-field-input label="Source sensibilité sonore" controlName="source_sens_sonore" [formGroup]="form" [editing]="true"></app-field-input>
+                  </div>
+                </div>
+                <div class="column">
+                  <app-section-header title="Résistances"></app-section-header>
+                  <div class="fields-stack">
+                    <app-field-select label="Résistance mécanique" controlName="resistance_chocs_mecaniques" [formGroup]="form" [editing]="true" [options]="resistanceOptions"></app-field-select>
+                    <app-field-select label="Résistance chimique" controlName="resistance_chocs_chimiques" [formGroup]="form" [editing]="true" [options]="resistanceOptions"></app-field-select>
+                    <app-field-select label="Résistance thermique" controlName="resistance_chocs_thermiques" [formGroup]="form" [editing]="true" [options]="resistanceOptions"></app-field-select>
+                    <app-field-input label="Source résistances" controlName="source_resistances" [formGroup]="form" [editing]="true"></app-field-input>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- ONGLET 3 : Biologie & Morphologie -->
+            @if (activeTab === 'biologie') {
+              <div class="two-columns">
+                <div class="column">
+                  <app-section-header title="Biologie"></app-section-header>
+                  <div class="fields-stack">
+                    <app-field-select label="Comportement" controlName="comportement" [formGroup]="form" [editing]="true" [options]="comportementOptions"></app-field-select>
+                    <app-field-input label="Source comportement" controlName="source_comportement" [formGroup]="form" [editing]="true"></app-field-input>
+                    <app-field-input label="Période de reproduction" controlName="periode_reproduction" [formGroup]="form" [editing]="true"></app-field-input>
+                  </div>
+                </div>
+                <div class="column">
+                  <app-section-header title="Morphologie"></app-section-header>
+                  <div class="fields-stack">
+                    <app-field-select label="Forme du corps" controlName="forme_corps" [formGroup]="form" [editing]="true" [options]="formeCorpsOptions"></app-field-select>
+                    <app-field-input label="Source forme corps" controlName="source_forme_corps" [formGroup]="form" [editing]="true"></app-field-input>
+                    <app-field-input label="Type de peau" controlName="type_peau" [formGroup]="form" [editing]="true"></app-field-input>
+                    <app-field-input label="Source type peau" controlName="source_type_peau" [formGroup]="form" [editing]="true"></app-field-input>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- ONGLET 4 : Capacités de nage -->
+            @if (activeTab === 'nage') {
+              <div class="two-columns">
+                <div class="column">
+                  <app-section-header title="Locomotion & Endurance"></app-section-header>
+                  <div class="fields-stack">
+                    <app-field-select label="Locomotion" controlName="locomotion" [formGroup]="form" [editing]="true" [options]="locomotionOptions"></app-field-select>
+                    <app-field-input label="Source locomotion" controlName="source_locomotion" [formGroup]="form" [editing]="true"></app-field-input>
+                    <app-field-input label="Endurance" controlName="endurance" [formGroup]="form" [editing]="true"></app-field-input>
+                    <app-field-input label="Source endurance" controlName="source_endurance" [formGroup]="form" [editing]="true"></app-field-input>
+                  </div>
+                </div>
+                <div class="column">
+                  <app-section-header title="Vitesses juvénile (m/s)"></app-section-header>
+                  <div class="fields-stack">
+                    <app-field-input label="Vitesse croisière juvénile" controlName="vitesse_croisiere_juvenile_ms" [formGroup]="form" [editing]="true" type="number" unit="m/s"></app-field-input>
+                    <app-field-input label="Vitesse soutenue juvénile" controlName="vitesse_soutenue_juvenile_ms" [formGroup]="form" [editing]="true" type="number" unit="m/s"></app-field-input>
+                    <app-field-input label="Vitesse sprint juvénile" controlName="vitesse_sprint_juvenile_ms" [formGroup]="form" [editing]="true" type="number" unit="m/s"></app-field-input>
+                  </div>
+                </div>
+              </div>
+
+              <div class="two-columns mt-section">
+                <div class="column">
+                  <app-section-header title="Vitesses adulte (m/s)"></app-section-header>
+                  <div class="fields-stack">
+                    <app-field-input label="Vitesse croisière adulte" controlName="vitesse_croisiere_adulte_ms" [formGroup]="form" [editing]="true" type="number" unit="m/s"></app-field-input>
+                    <app-field-input label="Vitesse soutenue adulte" controlName="vitesse_soutenue_adulte_ms" [formGroup]="form" [editing]="true" type="number" unit="m/s"></app-field-input>
+                    <app-field-input label="Vitesse sprint adulte" controlName="vitesse_sprint_adulte_ms" [formGroup]="form" [editing]="true" type="number" unit="m/s"></app-field-input>
+                    <app-field-input label="Source vitesses" controlName="source_vitesse_nage" [formGroup]="form" [editing]="true"></app-field-input>
+                  </div>
+                </div>
+                <div class="column"></div>
+              </div>
+            }
+
+          </div>
+        </form>
+      }
+    </main>
+  </div>
+</div>

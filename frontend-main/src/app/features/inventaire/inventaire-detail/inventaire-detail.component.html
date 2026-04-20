@@ -1,0 +1,169 @@
+<div class="page-layout">
+  <app-sidebar></app-sidebar>
+
+  <div class="page-content">
+    <app-header [breadcrumbs]="breadcrumbs"></app-header>
+
+    <main class="main">
+
+      @if (loading) {
+        <div class="skeleton-header"></div>
+      } @else if (error || !item) {
+        <div class="error-state">Inventaire introuvable.</div>
+      } @else {
+
+        <div class="detail-header">
+          <div class="detail-header__left">
+            <div class="detail-header__title-row">
+              <h1 class="detail-title">
+                Inventaire {{ item.id_inventaire }}
+              </h1>
+              @if (editing) {
+                <span class="badge-edition">Mode Édition</span>
+              }
+            </div>
+            <p class="detail-subtitle">{{ item.centrale_label || '—' }}</p>
+          </div>
+          <div class="detail-header__actions">
+            @if (!editing) {
+              @if (authService.isAdmin) {
+                <button class="btn btn-primary" (click)="startEdit()">
+                  <img src="assets/icons/edit.svg" class="btn-icon btn-icon--white" alt=""/>
+                  Modifier
+                </button>
+              }
+            } @else {
+              <button class="btn btn-outline-accent" (click)="cancelEdit()" [disabled]="saving">Annuler</button>
+              <button class="btn btn-primary" (click)="saveEdit()" [disabled]="saving || !hasChanges || form.invalid">
+                @if (saving) {
+                  <span class="material-symbols-outlined btn-icon spinning">progress_activity</span>
+                  Enregistrement…
+                } @else {
+                  Enregistrer
+                }
+              </button>
+            }
+          </div>
+        </div>
+
+        @if (saved) {
+          <div class="toast-success">
+            <span class="material-symbols-outlined">check_circle</span>
+            Modifications enregistrées avec succès
+          </div>
+        }
+
+        <form [formGroup]="form">
+          <div class="tab-panel">
+            <div class="two-columns">
+
+              <!-- Colonne gauche -->
+              <div class="column">
+                <app-section-header title="Identification"></app-section-header>
+                <div class="fields-stack">
+
+                  <!-- Centrale -->
+                  @if (!editing) {
+                    <div class="field-display">
+                      <span class="field-label">Centrale</span>
+                      <span class="field-value">{{ item.centrale_label || '—' }}</span>
+                    </div>
+                  } @else {
+                    <app-field-select
+                      label="Centrale"
+                      controlName="centrale"
+                      [formGroup]="form"
+                      [editing]="true"
+                      [options]="centralesOptions">
+                    </app-field-select>
+                  }
+
+                  <app-field-input
+                    label="Nom commun"
+                    controlName="nom_commun"
+                    [formGroup]="form"
+                    [editing]="editing">
+                  </app-field-input>
+
+                </div>
+              </div>
+
+              <!-- Colonne droite -->
+              <div class="column">
+                <app-section-header title="Espèces"></app-section-header>
+                <div class="fields-stack">
+
+                  <!-- Poisson -->
+                  <div [class.field-disabled]="editing && hasNonPoisson">
+                    <app-field-select
+                      label="Groupe poisson"
+                      controlName="groupe_poisson"
+                      [formGroup]="form"
+                      [editing]="editing">
+                    </app-field-select>
+
+                    @if (!editing) {
+                      <div class="field-display">
+                        <span class="field-label">Espèce poisson</span>
+                        <span class="field-value">{{ item.espece_poisson_label || '—' }}</span>
+                      </div>
+                    } @else {
+                      <app-field-select
+                        label="Espèce poisson"
+                        controlName="espece_poisson"
+                        [formGroup]="form"
+                        [editing]="!hasNonPoisson"
+                        [options]="poissonsOptions">
+                      </app-field-select>
+                      @if (hasNonPoisson) {
+                        <p class="field-hint">Une espèce non-poisson est déjà sélectionnée.</p>
+                      }
+                    }
+                  </div>
+
+                  <!-- Non-poisson -->
+                  <div [class.field-disabled]="editing && hasPoisson">
+                    <app-field-select
+                      label="Groupe non-poisson"
+                      controlName="groupe_non_poisson"
+                      [formGroup]="form"
+                      [editing]="editing">
+                    </app-field-select>
+
+                    @if (!editing) {
+                      <div class="field-display">
+                        <span class="field-label">Espèce non-poisson</span>
+                        <span class="field-value">{{ item.espece_non_poisson_label || '—' }}</span>
+                      </div>
+                    } @else {
+                      <app-field-select
+                        label="Espèce non-poisson"
+                        controlName="espece_non_poisson"
+                        [formGroup]="form"
+                        [editing]="!hasPoisson"
+                        [options]="nonPoissonsOptions">
+                      </app-field-select>
+                      @if (hasPoisson) {
+                        <p class="field-hint">Une espèce poisson est déjà sélectionnée.</p>
+                      }
+                    }
+                  </div>
+
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </form>
+      }
+    </main>
+  </div>
+
+  @if (confirmLeaveService.showModal()) {
+    <app-confirm-leave-modal
+      (cancel)="confirmLeaveService.respond('cancel')"
+      (discard)="confirmLeaveService.respond('discard')"
+      (save)="confirmLeaveService.respond('save')">
+    </app-confirm-leave-modal>
+  }
+</div>

@@ -1,0 +1,123 @@
+<div class="page-layout">
+  <app-sidebar></app-sidebar>
+
+  <div class="page-content">
+    <app-header [breadcrumbs]="breadcrumbs"></app-header>
+
+    <main class="main">
+
+      @if (loading) {
+        <div class="skeleton-header"></div>
+      } @else {
+
+        <div class="detail-header">
+          <div class="detail-header__left">
+            <div class="detail-header__title-row">
+              <h1 class="detail-title">
+                {{ isEdit ? "Modifier l'inventaire" : 'Nouvel inventaire' }}
+              </h1>
+            </div>
+            @if (isEdit) {
+              <p class="detail-subtitle">Modification des données</p>
+            }
+          </div>
+          <div class="detail-header__actions">
+            <button class="btn btn-outline-accent" (click)="onCancel()" [disabled]="saving">
+              Annuler
+            </button>
+            <button class="btn btn-primary" (click)="onSubmit()" [disabled]="saving || form.invalid">
+              @if (saving) {
+                <span class="material-symbols-outlined btn-icon spinning">progress_activity</span>
+                Enregistrement…
+              } @else {
+                <img src="assets/icons/save.svg" class="btn-icon btn-icon--white" alt=""/>
+                Enregistrer
+              }
+            </button>
+          </div>
+        </div>
+
+        <form [formGroup]="form">
+          <div class="tab-panel">
+            <div class="two-columns">
+
+              <!-- Colonne gauche -->
+              <div class="column">
+                <app-section-header title="Identification"></app-section-header>
+                <div class="fields-stack">
+
+                  <app-field-select
+                    label="Centrale"
+                    controlName="centrale"
+                    [formGroup]="form"
+                    [editing]="true"
+                    [options]="centralesOptions"
+                    [required]="true">
+                  </app-field-select>
+
+                  <app-field-input
+                    label="Nom commun"
+                    controlName="nom_commun"
+                    [formGroup]="form"
+                    [editing]="true">
+                  </app-field-input>
+
+                </div>
+              </div>
+
+              <!-- Colonne droite -->
+              <div class="column">
+                <app-section-header title="Espèces"></app-section-header>
+                <div class="fields-stack">
+
+                 <div [class.field-disabled]="hasNonPoisson">
+      <app-field-select
+        label="Groupe poisson"
+        controlName="groupe_poisson"
+        [formGroup]="form"
+        [editing]="true"
+        [options]="groupeOptions">
+      </app-field-select>
+      <app-field-select
+        label="Espèce poisson"
+        controlName="espece_poisson"
+        [formGroup]="form"
+        [editing]="!hasNonPoisson"
+        [options]="poissonsOptions">
+      </app-field-select>
+      @if (hasNonPoisson) {
+        <p class="field-hint">Une espèce non-poisson est déjà sélectionnée.</p>
+      }
+    </div>
+
+    <!-- Non-poisson -->
+    <div [class.field-disabled]="hasPoisson">
+      <app-field-select
+        label="Groupe non-poisson"
+        controlName="groupe_non_poisson"
+        [formGroup]="form"
+        [editing]="true"
+        [options]="groupeOptions">
+      </app-field-select>
+      <app-field-select
+        label="Espèce non-poisson"
+        controlName="espece_non_poisson"
+        [formGroup]="form"
+        [editing]="!hasPoisson"
+        [options]="nonPoissonsOptions">
+      </app-field-select>
+      @if (hasPoisson) {
+        <p class="field-hint">Une espèce poisson est déjà sélectionnée.</p>
+      }
+    </div>
+
+  </div>
+</div>
+
+            </div>
+          </div>
+        </form>
+      }
+    </main>
+  </div>
+</div>

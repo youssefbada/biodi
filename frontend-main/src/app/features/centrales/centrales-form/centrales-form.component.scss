@@ -1,0 +1,31 @@
+// // Tout le design est hérité des classes globales
+// // définies dans centrales-detail.component.scss
+// // et dans les styles partagés (_layout, _buttons, _forms)
+
+// .empty-tab {
+//   display: flex;
+//   flex-direction: column;
+//   align-items: center;
+//   justify-content: center;
+//   gap: 0.75rem;
+//   padding: 3rem;
+//   color: var(--text-secondary);
+
+//   .empty-icon {
+//     font-size: 2.5rem;
+//     opacity: 0.4;
+//   }
+// }
+
+// .skeleton-header {
+//   height: 4rem;
+//   background: var(--bg-gray);
+//   border-radius: var(--radius-md);
+//   margin-bottom: 1.5rem;
+//   animation: pulse 1.5s ease-in-out infinite;
+// }
+
+// @keyframes pulse {
+//   0%, 100% { opacity: 1; }
+//   50% { opacity: 0.5; }
+// }

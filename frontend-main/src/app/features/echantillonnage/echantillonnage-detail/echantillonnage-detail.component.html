@@ -1,0 +1,255 @@
+<div class="page-layout">
+  <app-sidebar></app-sidebar>
+
+  <div class="page-content">
+    <app-header [breadcrumbs]="breadcrumbs"></app-header>
+
+    <main class="main">
+
+      @if (loading) {
+        <div class="skeleton-header"></div>
+      } @else if (error || !item) {
+        <div class="error-state">Échantillonnage introuvable.</div>
+      } @else {
+
+        <div class="detail-header">
+          <div class="detail-header__left">
+            <div class="detail-header__title-row">
+              <h1 class="detail-title">
+                Échantillonnage {{ item.id_echantillonnage }}
+              </h1>
+              @if (editing) {
+                <span class="badge-edition">Mode Édition</span>
+              }
+            </div>
+            <p class="detail-subtitle">
+              {{ item.centrale_label || '—' }} — {{ item.date_echantillonnage || '—' }}
+            </p>
+          </div>
+          <div class="detail-header__actions">
+            @if (!editing) {
+              @if (authService.isAdmin) {
+                <button class="btn btn-primary" (click)="startEdit()">
+                  <img src="assets/icons/edit.svg" class="btn-icon btn-icon--white" alt=""/>
+                  Modifier
+                </button>
+              }
+            } @else {
+              <button class="btn btn-outline-accent" (click)="cancelEdit()" [disabled]="saving">Annuler</button>
+              <button class="btn btn-primary" (click)="saveEdit()" [disabled]="saving || !hasChanges || form.invalid">
+                @if (saving) {
+                  <span class="material-symbols-outlined btn-icon spinning">progress_activity</span>
+                  Enregistrement…
+                } @else {
+                  Enregistrer
+                }
+              </button>
+            }
+          </div>
+        </div>
+
+        @if (saved) {
+          <div class="toast-success">
+            <span class="material-symbols-outlined">check_circle</span>
+            Modifications enregistrées avec succès
+          </div>
+        }
+
+        <nav class="tab-bar">
+          <button class="tab-btn" [class.active]="activeTab === 'general'" (click)="setTab('general')">
+            Données générales
+          </button>
+          <button class="tab-btn" [class.active]="activeTab === 'stades'" (click)="setTab('stades')">
+            Captures par stades
+          </button>
+          <button class="tab-btn" [class.active]="activeTab === 'saisons'" (click)="setTab('saisons')">
+            Captures par saison
+          </button>
+        </nav>
+
+        <form [formGroup]="form">
+          <div class="tab-panel">
+
+            <!-- ONGLET 1 : Données générales -->
+            @if (activeTab === 'general') {
+              <div class="two-columns">
+                <div class="column">
+                  <app-section-header title="Données d'échantillonnage"></app-section-header>
+                  <div class="fields-stack">
+
+                    <!-- Centrale -->
+                    @if (!editing) {
+                      <div class="field-display">
+                        <span class="field-label">Centrale</span>
+                        <span class="field-value">{{ item.centrale_label || '—' }}</span>
+                      </div>
+                    } @else {
+                      <app-field-select label="Centrale" controlName="centrale" [formGroup]="form" [editing]="true" [options]="centralesOptions" [required]="true"></app-field-select>
+                    }
+
+                    <app-field-input label="Date d'échantillonnage" controlName="date_echantillonnage" [formGroup]="form" [editing]="editing"></app-field-input>
+                    <app-field-input label="Nombre d'échantillonnage" controlName="nombre_echantillonnage" [formGroup]="form" [editing]="editing" type="number"></app-field-input>
+                    <app-field-input label="Durée d'échantillonnage" controlName="duree_echantillonnage_min" [formGroup]="form" [editing]="editing" type="number" unit="min"></app-field-input>
+                    <app-field-toggle label="Débris végétaux" controlName="debris_vegetaux" [formGroup]="form" [editing]="editing"></app-field-toggle>
+                  </div>
+                </div>
+
+                <div class="column">
+                  <app-section-header title="Espèce piégée"></app-section-header>
+                  <div class="fields-stack">
+
+                    <app-field-select label="Groupe" controlName="groupe" [formGroup]="form" [editing]="editing" [options]="groupeOptions"></app-field-select>
+
+                    <!-- Poisson -->
+                    @if (!editing) {
+                      <div class="field-display">
+                        <span class="field-label">Poisson</span>
+                        <span class="field-value">{{ item.poisson_label || '—' }}</span>
+                      </div>
+                    } @else {
+                      <app-field-select label="Poisson" controlName="poisson" [formGroup]="form" [editing]="true" [options]="poissonsOptions"></app-field-select>
+                    }
+
+                    <!-- Non-poisson -->
+                    @if (!editing) {
+                      <div class="field-display">
+                        <span class="field-label">Non-poisson</span>
+                        <span class="field-value">{{ item.non_poisson_label || '—' }}</span>
+                      </div>
+                    } @else {
+                      <app-field-select label="Non-poisson" controlName="non_poisson" [formGroup]="form" [editing]="true" [options]="nonPoissonsOptions"></app-field-select>
+                    }
+
+                    <app-field-select label="Fréquence d'occurrence" controlName="frequence_occurrence" [formGroup]="form" [editing]="editing" [options]="frequenceOptions"></app-field-select>
+                    <app-field-input label="Sources" controlName="sources" [formGroup]="form" [editing]="editing"></app-field-input>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- ONGLET 2 : Captures par stades -->
+            @if (activeTab === 'stades') {
+              <div class="two-columns">
+                <div class="column">
+                  <app-section-header title="Juvéniles"></app-section-header>
+                  <div class="fields-stack">
+                    <app-field-input label="Nombre d'individus" controlName="juveniles_nombre_individus" [formGroup]="form" [editing]="editing" type="number"></app-field-input>
+                    <app-field-input label="Poids (g)" controlName="juveniles_pois" [formGroup]="form" [editing]="editing" type="number" unit="g"></app-field-input>
+                    <app-field-input label="Poids moyen (g)" controlName="juveniles_poids_moyen" [formGroup]="form" [editing]="editing" type="number" unit="g"></app-field-input>
+                    <app-field-input label="Occurrence" controlName="juveniles_occurence" [formGroup]="form" [editing]="editing" type="number"></app-field-input>
+                    <app-field-input label="% O" controlName="juveniles_pct_o" [formGroup]="form" [editing]="editing" type="number" unit="%"></app-field-input>
+                    <app-field-input label="Taille moyenne" controlName="juveniles_taille_moy_cm" [formGroup]="form" [editing]="editing" type="number" unit="cm"></app-field-input>
+                    <app-field-input label="Taux de survie" controlName="juveniles_taux_survie" [formGroup]="form" [editing]="editing" type="number" unit="%"></app-field-input>
+                    <app-field-input label="Taux de mortalité" controlName="juveniles_taux_mortalite" [formGroup]="form" [editing]="editing" type="number" unit="%"></app-field-input>
+                  </div>
+                </div>
+                <div class="column">
+                  <app-section-header title="Adultes"></app-section-header>
+                  <div class="fields-stack">
+                    <app-field-input label="Nombre d'individus" controlName="adultes_nombre_individus" [formGroup]="form" [editing]="editing" type="number"></app-field-input>
+                    <app-field-input label="Poids (g)" controlName="adultes_poids" [formGroup]="form" [editing]="editing" type="number" unit="g"></app-field-input>
+                    <app-field-input label="Poids moyen (g)" controlName="adultes_poids_moyen" [formGroup]="form" [editing]="editing" type="number" unit="g"></app-field-input>
+                    <app-field-input label="Occurrence" controlName="adultes_occurence" [formGroup]="form" [editing]="editing" type="number"></app-field-input>
+                    <app-field-input label="% O" controlName="adultes_pct_o" [formGroup]="form" [editing]="editing" type="number" unit="%"></app-field-input>
+                    <app-field-input label="Taille moyenne" controlName="adultes_taille_moy_cm" [formGroup]="form" [editing]="editing" type="number" unit="cm"></app-field-input>
+                    <app-field-input label="Taux de survie" controlName="adultes_taux_survie" [formGroup]="form" [editing]="editing" type="number" unit="%"></app-field-input>
+                    <app-field-input label="Taux de mortalité" controlName="adultes_taux_mortalite" [formGroup]="form" [editing]="editing" type="number" unit="%"></app-field-input>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-section">
+                <app-section-header title="Totaux"></app-section-header>
+                <div class="fields-grid">
+                  <app-field-input label="Nombre d'individus" controlName="totaux_nombre_individus" [formGroup]="form" [editing]="editing" type="number"></app-field-input>
+                  <app-field-input label="Poids (g)" controlName="totaux_poids" [formGroup]="form" [editing]="editing" type="number" unit="g"></app-field-input>
+                  <app-field-input label="Poids moyen (g)" controlName="totaux_poids_moyen" [formGroup]="form" [editing]="editing" type="number" unit="g"></app-field-input>
+                  <app-field-input label="Occurrence" controlName="totaux_occurence" [formGroup]="form" [editing]="editing" type="number"></app-field-input>
+                  <app-field-input label="% O" controlName="totaux_pct_o" [formGroup]="form" [editing]="editing" type="number" unit="%"></app-field-input>
+                  <app-field-input label="Taille moyenne" controlName="totaux_taille_moy" [formGroup]="form" [editing]="editing" type="number" unit="cm"></app-field-input>
+                  <app-field-input label="Taux de survie" controlName="totaux_taux_survie" [formGroup]="form" [editing]="editing" type="number" unit="%"></app-field-input>
+                  <app-field-input label="Taux de mortalité" controlName="totaux_taux_mortalite" [formGroup]="form" [editing]="editing" type="number" unit="%"></app-field-input>
+                </div>
+              </div>
+            }
+
+            <!-- ONGLET 3 : Captures par saison -->
+            @if (activeTab === 'saisons') {
+              <!-- Hiver -->
+              <div class="two-columns">
+                <div class="column">
+                  <app-section-header title="❄️ Hiver"></app-section-header>
+                  <div class="fields-stack">
+                    <app-field-input label="Nb échantillonnage" controlName="hiver_nombre_echantillonnage" [formGroup]="form" [editing]="editing"></app-field-input>
+                    <app-field-input label="Nombre d'individus" controlName="hiver_nombre_individus" [formGroup]="form" [editing]="editing" type="number"></app-field-input>
+                    <app-field-input label="Poids (g)" controlName="hiver_poids" [formGroup]="form" [editing]="editing" type="number" unit="g"></app-field-input>
+                    <app-field-input label="Poids moyen (g)" controlName="hiver_poids_moyen" [formGroup]="form" [editing]="editing" type="number" unit="g"></app-field-input>
+                    <app-field-input label="Occurrence" controlName="hiver_occurence" [formGroup]="form" [editing]="editing" type="number"></app-field-input>
+                    <app-field-input label="% O" controlName="hiver_pct_o" [formGroup]="form" [editing]="editing" type="number" unit="%"></app-field-input>
+                    <app-field-input label="Taille moyenne" controlName="hiver_taille_moy" [formGroup]="form" [editing]="editing" type="number" unit="cm"></app-field-input>
+                    <app-field-input label="Taux de survie" controlName="hiver_taux_survie" [formGroup]="form" [editing]="editing" type="number" unit="%"></app-field-input>
+                    <app-field-input label="Taux de mortalité" controlName="hiver_taux_mortalite" [formGroup]="form" [editing]="editing" type="number" unit="%"></app-field-input>
+                  </div>
+                </div>
+                <div class="column">
+                  <app-section-header title="🌸 Printemps"></app-section-header>
+                  <div class="fields-stack">
+                    <app-field-input label="Nb échantillonnage" controlName="printemps_nombre_echantillonnage" [formGroup]="form" [editing]="editing"></app-field-input>
+                    <app-field-input label="Nombre d'individus" controlName="printemps_nombre_individus" [formGroup]="form" [editing]="editing" type="number"></app-field-input>
+                    <app-field-input label="Poids (g)" controlName="printemps_poids" [formGroup]="form" [editing]="editing" type="number" unit="g"></app-field-input>
+                    <app-field-input label="Poids moyen (g)" controlName="printemps_poids_moyen" [formGroup]="form" [editing]="editing" type="number" unit="g"></app-field-input>
+                    <app-field-input label="Occurrence" controlName="printemps_occurence" [formGroup]="form" [editing]="editing" type="number"></app-field-input>
+                    <app-field-input label="% O" controlName="printemps_pct_o" [formGroup]="form" [editing]="editing" type="number" unit="%"></app-field-input>
+                    <app-field-input label="Taille moyenne" controlName="printemps_taille_moy" [formGroup]="form" [editing]="editing" type="number" unit="cm"></app-field-input>
+                    <app-field-input label="Taux de survie" controlName="printemps_taux_survie" [formGroup]="form" [editing]="editing" type="number" unit="%"></app-field-input>
+                    <app-field-input label="Taux de mortalité" controlName="printemps_taux_mortalite" [formGroup]="form" [editing]="editing" type="number" unit="%"></app-field-input>
+                  </div>
+                </div>
+              </div>
+
+              <div class="two-columns mt-section">
+                <div class="column">
+                  <app-section-header title="☀️ Été"></app-section-header>
+                  <div class="fields-stack">
+                    <app-field-input label="Nb échantillonnage" controlName="ete_nombre_echantillonnage" [formGroup]="form" [editing]="editing"></app-field-input>
+                    <app-field-input label="Nombre d'individus" controlName="ete_nombre_individus" [formGroup]="form" [editing]="editing" type="number"></app-field-input>
+                    <app-field-input label="Poids (g)" controlName="ete_poids" [formGroup]="form" [editing]="editing" type="number" unit="g"></app-field-input>
+                    <app-field-input label="Poids moyen (g)" controlName="ete_poids_moyen" [formGroup]="form" [editing]="editing" type="number" unit="g"></app-field-input>
+                    <app-field-input label="Occurrence" controlName="ete_occurence" [formGroup]="form" [editing]="editing" type="number"></app-field-input>
+                    <app-field-input label="% O" controlName="ete_pct_o" [formGroup]="form" [editing]="editing" type="number" unit="%"></app-field-input>
+                    <app-field-input label="Taille moyenne" controlName="ete_taille_moy" [formGroup]="form" [editing]="editing" type="number" unit="cm"></app-field-input>
+                    <app-field-input label="Taux de survie" controlName="ete_taux_survie" [formGroup]="form" [editing]="editing" type="number" unit="%"></app-field-input>
+                    <app-field-input label="Taux de mortalité" controlName="ete_taux_mortalite" [formGroup]="form" [editing]="editing" type="number" unit="%"></app-field-input>
+                  </div>
+                </div>
+                <div class="column">
+                  <app-section-header title="🍂 Automne"></app-section-header>
+                  <div class="fields-stack">
+                    <app-field-input label="Nb échantillonnage" controlName="automne_nombre_echantillonnage" [formGroup]="form" [editing]="editing"></app-field-input>
+                    <app-field-input label="Nombre d'individus" controlName="automne_nombre_individus" [formGroup]="form" [editing]="editing" type="number"></app-field-input>
+                    <app-field-input label="Poids (g)" controlName="automne_poids" [formGroup]="form" [editing]="editing" type="number" unit="g"></app-field-input>
+                    <app-field-input label="Poids moyen (g)" controlName="automne_poids_moyen" [formGroup]="form" [editing]="editing" type="number" unit="g"></app-field-input>
+                    <app-field-input label="Occurrence" controlName="automne_occurence" [formGroup]="form" [editing]="editing" type="number"></app-field-input>
+                    <app-field-input label="% O" controlName="automne_pct_o" [formGroup]="form" [editing]="editing" type="number" unit="%"></app-field-input>
+                    <app-field-input label="Taille moyenne" controlName="automne_taille_moy" [formGroup]="form" [editing]="editing" type="number" unit="cm"></app-field-input>
+                    <app-field-input label="Taux de survie" controlName="automne_taux_survie" [formGroup]="form" [editing]="editing" type="number" unit="%"></app-field-input>
+                    <app-field-input label="Taux de mortalité" controlName="automne_taux_mortalite" [formGroup]="form" [editing]="editing" type="number" unit="%"></app-field-input>
+                  </div>
+                </div>
+              </div>
+            }
+
+          </div>
+        </form>
+      }
+    </main>
+  </div>
+
+  @if (confirmLeaveService.showModal()) {
+    <app-confirm-leave-modal
+      (cancel)="confirmLeaveService.respond('cancel')"
+      (discard)="confirmLeaveService.respond('discard')"
+      (save)="confirmLeaveService.respond('save')">
+    </app-confirm-leave-modal>
+  }
+</div>

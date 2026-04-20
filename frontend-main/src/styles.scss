@@ -1,0 +1,69 @@
+@use 'styles/mixins' as m;
+@use 'styles/buttons';
+@use 'styles/forms';
+@use 'styles/table';
+@use 'styles/badges';
+@use 'styles/layout';
+@use 'styles/details';
+
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
+@import 'material-symbols';
+
+:root {
+  --primary: #001A70;
+  --primary-dark: #001055;
+  --primary-light: rgba(0, 26, 112, 0.08);
+  --orange: #FE5800;
+  --text-primary: #111318;
+  --text-secondary: #616f89;
+  --text-muted: #9ca3af;
+  --bg-page: #f6f6f8;
+  --bg-white: #ffffff;
+  --bg-gray: #f3f4f6;
+  --bg-gray-dark: #f9fafb;
+  --border-color: #e5e7eb;
+  --border-input: #d1d5db;
+  --sidebar-width: 18.33rem;
+  --header-height: 4rem;
+  --sidebar-bg: #001A70;
+  --radius-sm: 0.38rem;
+  --radius-md: 0.61rem;
+  --radius-lg: 0.92rem;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --font-family: 'Inter', sans-serif;
+  --font-size-xs: 0.69rem;
+  --font-size-sm: 0.84rem;
+  --font-size-base: 1rem;
+  --font-size-md: 1.07rem;
+  --font-size-lg: 1.38rem;
+  --font-size-xl: 1.84rem;
+}
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 12px;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #a1a1a1; }

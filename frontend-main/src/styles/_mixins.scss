@@ -1,0 +1,58 @@
+// ─── Flex center ───
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// ─── Flex between ───
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+// ─── Truncate ───
+@mixin truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// ─── Card ───
+@mixin card {
+  background-color: var(--bg-white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+// ─── Focus ring ───
+@mixin focus-ring {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+// ─── Zoom safe layout ───
+@mixin zoom-safe {
+  min-width: 0;
+  overflow: hidden;
+}
+
+// ─── Responsive breakpoints ───
+@mixin tablet {
+  @media (max-width: 1280px) { @content; }
+}
+
+@mixin mobile {
+  @media (max-width: 768px) { @content; }
+}
+
+// ─── Windows 150% zoom fix ───
+@mixin windows-zoom {
+  @media screen and (-webkit-min-device-pixel-ratio: 1.25),
+         screen and (min-resolution: 120dpi) {
+    @content;
+  }
+}

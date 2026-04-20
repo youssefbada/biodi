@@ -1,0 +1,23 @@
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <img src="assets/icons/logo.svg" class="logo-img" alt="Biodiv"/>
+
+    <span class="logo-text">Biodiv</span>
+  </div>
+
+  <nav class="sidebar-nav">
+    @for (item of navItems; track item.route) {
+      <a [routerLink]="item.route"
+         routerLinkActive="nav-item--active"
+          [routerLinkActiveOptions]="item.route === '/' ? {exact: true} : {exact: false}"
+         class="nav-item">
+        <img [src]="'assets/icons/' + item.icon + '.svg'" class="nav-icon" [alt]="item.label"/>
+        <span class="nav-label">{{ item.label }}</span>
+      </a>
+    }
+  </nav>
+
+  <div class="sidebar-footer">
+    <span>© 2026 EDF</span>
+  </div>
+</aside>

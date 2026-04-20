@@ -1,0 +1,35 @@
+<p>confirm-leave-modal works!</p>
+<div class="modal-overlay" (click)="cancel.emit()">
+  <div class="modal" (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <h3 class="modal-title">
+        <span class="material-symbols-outlined">warning</span>
+        Modifications non enregistrées
+      </h3>
+      <button class="modal-close" (click)="cancel.emit()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <p class="modal-message">
+        Vous avez des modifications non enregistrées. Que souhaitez-vous faire ?
+      </p>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="cancel.emit()">
+        Rester sur la page
+      </button>
+      <button class="btn-discard" (click)="discard.emit()">
+        Annuler les modifications
+      </button>
+      <button class="btn-save" (click)="save.emit()">
+        <span class="material-symbols-outlined">save</span>
+        Enregistrer
+      </button>
+    </div>
+
+  </div>
+</div>

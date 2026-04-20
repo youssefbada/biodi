@@ -1,0 +1,119 @@
+variables:
+  NEXUS_REGISTRY: "nexus.retd.edf.fr:5141"
+  APP_NAME: "biodiv-registry/frontend"
+  NEXUS_IMAGE: "${NEXUS_REGISTRY}/${APP_NAME}"
+  SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+  GIT_DEPTH: "0"
+
+stages:
+  - test
+  - sonar
+  - build
+  - deploy
+
+# ─── TESTS ───────────────────────────────────────────────
+test:
+  stage: test
+  image: nexus.retd.edf.fr/node:24.0.2-alpine
+  before_script:
+    - npm ci
+        --registry="https://nexus.retd.edf.fr/repository/mainnpm/"
+        --strict-ssl=false
+  script:
+    - echo "Tests à implémenter"
+    # - npm run test -- --watch=false --browsers=ChromeHeadless
+  allow_failure: true
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == 'develop'
+    - if: $CI_COMMIT_TAG
+  # only:
+  #   - main
+  #   - tags
+
+# ─── SONAR ───────────────────────────────────────────────
+sonar:
+  stage: sonar
+  image:
+    name: nexus.retd.edf.fr/sonarsource/sonar-scanner-cli:latest
+    entrypoint: [""]
+    docker:
+      user: root
+  cache:
+    policy: pull-push
+    key: "sonar-cache-$CI_COMMIT_REF_SLUG"
+    paths:
+      - "${SONAR_USER_HOME}/cache"
+  script:
+    - 2>&1 openssl s_client -showcerts -servername sonar-ee.retd.edf.fr -connect sonar-ee.retd.edf.fr:443 </dev/null|grep -Pzo "[-]+BEGIN CERTIFICATE(.+\n)+.*END CERTIFICATE[-]+\n" > /tmp/sonar-eeretdedffr.crt
+    - keytool -import -alias sonar-edf-new -keystore /usr/lib/jvm/java-21-amazon-corretto.x86_64/lib/security/cacerts -file /tmp/sonar-eeretdedffr.crt -storepass "changeit" -noprompt
+    - sonar-scanner
+      -Dsonar.host.url="${SONAR_HOST_URL}"
+      -Dsonar.token="${SONAR_TOKEN_FRONT}"
+  allow_failure: true
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH == 'develop'
+
+# ─── BUILD IMAGE ─────────────────────────────────────────
+build:
+  stage: build
+  image: nexus.retd.edf.fr/docker:26
+  services:
+    - nexus.retd.edf.fr/docker:26-dind
+  before_script:
+    - echo "Registry = $NEXUS_REGISTRY"
+    - docker login $NEXUS_REGISTRY -u $NEXUS_USERNAME -p $NEXUS_PASSWORD
+    # - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker build -t $NEXUS_IMAGE:$CI_COMMIT_SHORT_SHA .
+    - docker push $NEXUS_IMAGE:$CI_COMMIT_SHORT_SHA
+    - docker tag $NEXUS_IMAGE:$CI_COMMIT_SHORT_SHA $NEXUS_IMAGE:latest
+    - docker push $NEXUS_IMAGE:latest
+    - |
+      if [ -n "$CI_COMMIT_TAG" ]; then
+        docker tag $NEXUS_IMAGE:$CI_COMMIT_SHORT_SHA $NEXUS_IMAGE:$CI_COMMIT_TAG
+        docker push $NEXUS_IMAGE:$CI_COMMIT_TAG
+        docker tag $NEXUS_IMAGE:$CI_COMMIT_SHORT_SHA $NEXUS_IMAGE:latest
+        docker push $NEXUS_IMAGE:latest
+      fi
+  rules:
+      - if: $CI_COMMIT_BRANCH == 'main'
+        when: on_success
+      - if: $CI_COMMIT_TAG
+        when: on_success
+      - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+        when: manual
+
+# ─── DEPLOY ──────────────────────────────────────────────
+deploy:
+  stage: deploy
+  image: nexus.retd.edf.fr/alpine:latest
+  before_script:
+    - echo https://linux.pleiade.edf.fr/alpine/v3.23/main/ > /etc/apk/repositories
+    - echo https://linux.pleiade.edf.fr/alpine/v3.23/community/ >> /etc/apk/repositories
+    - apk update --no-check-certificate --allow-untrusted
+    - apk add --no-check-certificate openssh-client
+    - eval $(ssh-agent -s)
+    - chmod 400 "$SSH_PRIVATE_KEY"
+    - ssh-add "$SSH_PRIVATE_KEY"
+    - mkdir -p ~/.ssh && chmod 700 ~/.ssh
+    - ssh-keyscan -H $VM_HOST >> ~/.ssh/known_hosts
+  script:
+    - |
+      ssh $VM_USER@$VM_HOST "
+        docker login $NEXUS_REGISTRY -u $NEXUS_USERNAME -p $NEXUS_PASSWORD &&
+        docker pull $NEXUS_IMAGE:${CI_COMMIT_TAG:-$CI_COMMIT_SHORT_SHA} &&
+        cd /opt/biodiv-deploy &&
+        FRONT_TAG=${CI_COMMIT_TAG:-$CI_COMMIT_SHORT_SHA} \
+        docker compose -p biodiv-prod -f docker-compose.yml -f docker-compose.prod.yml up -d --no-deps frontend
+      "
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == 'develop'
+
+  when: manual

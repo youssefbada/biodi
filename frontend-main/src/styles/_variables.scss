@@ -1,0 +1,44 @@
+// ─── Couleurs ───
+$primary: #001A70;
+$primary-dark: #001055;
+$primary-light: rgba(0, 26, 112, 0.08);
+$orange: #FE5800;
+$text-primary: #111318;
+$text-secondary: #616f89;
+$text-muted: #9ca3af;
+$bg-page: #f6f6f8;
+$bg-white: #ffffff;
+$bg-gray: #f3f4f6;
+$bg-gray-dark: #f9fafb;
+$border-color: #e5e7eb;
+$border-input: #d1d5db;
+
+// ─── Layout en rem ───
+// base 13px
+// sidebar 220px / 13 = 16.92rem
+// $sidebar-width: 16.92rem;
+// Sidebar 220px / 12px = 18.33rem
+$sidebar-width: 18.33rem;
+$header-height: 4rem;  // 48px
+$sidebar-bg: $primary;
+$header-height: 4rem;      // ~52px
+
+// ─── Border radius ───
+$radius-sm: 0.38rem;    // ~5px
+$radius-md: 0.61rem;    // ~8px
+$radius-lg: 0.92rem;    // ~12px
+$radius-full: 9999px;
+
+// ─── Shadows ───
+$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+$shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+// ─── Font ───
+$font-family: 'Inter', sans-serif;
+$font-size-xs:   0.69rem;   // ~9px
+$font-size-sm:   0.84rem;   // ~11px
+$font-size-base: 1rem;      // 13px
+$font-size-md:   1.07rem;   // ~14px
+$font-size-lg:   1.38rem;   // ~18px
+$font-size-xl:   1.84rem;   // ~24px
+$base-font-size: 13px;

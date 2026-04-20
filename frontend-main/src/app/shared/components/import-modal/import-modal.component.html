@@ -1,0 +1,154 @@
+<div class="modal-overlay" (click)="onClose()">
+  <div class="modal" (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="modal-header">
+      <h3 class="modal-title">
+        <span class="material-symbols-outlined">upload_file</span>
+        {{ title }}
+      </h3>
+      <button class="modal-close" (click)="onClose()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="modal-body">
+
+      <!-- Zone drag & drop -->
+      @if (status() === 'idle') {
+        <div
+          class="drop-zone"
+          [class.drop-zone--active]="isDragging()"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave()"
+          (drop)="onDrop($event)"
+          (click)="fileInput.click()">
+          <div class="drop-zone-icon">
+            <span class="material-symbols-outlined">description</span>
+          </div>
+          <p class="drop-zone-title">Glisser-déposer le fichier Excel</p>
+          <p class="drop-zone-subtitle">
+            ou <span class="drop-zone-link">choisir un fichier</span>
+          </p>
+          <p class="drop-zone-hint">Formats acceptés : .xlsx, .xls</p>
+          <input
+            #fileInput
+            type="file"
+            accept=".xlsx,.xls,.csv"
+            class="hidden-input"
+            (change)="onFileSelected($event)"/>
+        </div>
+      }
+
+      <!-- Fichier sélectionné + progression -->
+      @if (status() !== 'idle') {
+        <div class="file-info">
+          <div class="file-info-icon">
+            <span class="material-symbols-outlined">description</span>
+          </div>
+          <div class="file-info-details">
+            <span class="file-name">{{ selectedFile()?.name }}</span>
+            <span class="file-size">
+              {{ (selectedFile()?.size || 0) / 1024 | number:'1.0-0' }} Ko
+            </span>
+          </div>
+          @if (status() === 'idle' || status() === 'error') {
+            <button class="file-remove" (click)="reset()">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          }
+        </div>
+
+        <!-- Barre de progression -->
+        <div class="progress-block">
+          <div class="progress-header">
+            @if (status() === 'reading' || status() === 'validating' || status() === 'importing') {
+              <div class="progress-spinner"></div>
+            }
+            @if (status() === 'done' && validationErrors().length === 0) {
+              <span class="material-symbols-outlined progress-icon progress-icon--success">
+                check_circle
+              </span>
+            }
+            @if (status() === 'error' || validationErrors().length > 0) {
+              <span class="material-symbols-outlined progress-icon progress-icon--error">
+                error
+              </span>
+            }
+            <span class="progress-label"
+              [class.progress-label--success]="status() === 'done' && validationErrors().length === 0"
+              [class.progress-label--error]="status() === 'error' || validationErrors().length > 0">
+              {{ progressLabel() }}
+            </span>
+          </div>
+          <div class="progress-bar">
+            <div
+              class="progress-fill"
+              [class.progress-fill--success]="status() === 'done' && validationErrors().length === 0"
+              [class.progress-fill--error]="status() === 'error'"
+              [style.width.%]="progressPercent">
+            </div>
+          </div>
+          <div class="progress-footer">
+            <span>{{ status() === 'validating' ? 'Analyse de la structure...' : '' }}</span>
+            <span class="progress-percent">{{ progressPercent }}%</span>
+          </div>
+        </div>
+      }
+
+      <!-- Erreurs de validation -->
+      @if (validationErrors().length > 0) {
+        <div class="errors-block">
+          <p class="errors-title">
+            <span class="material-symbols-outlined">warning</span>
+            {{ validationErrors().length }} erreur(s) détectée(s)
+          </p>
+          <ul class="errors-list">
+            @for (error of validationErrors().slice(0, 5); track error.ligne) {
+              <li class="error-item">
+                <span class="error-ligne">Ligne {{ error.ligne }}</span>
+                <span class="error-message">{{ error.message }}</span>
+              </li>
+            }
+            @if (validationErrors().length > 5) {
+              <li class="error-more">
+                + {{ validationErrors().length - 5 }} autre(s) erreur(s)...
+              </li>
+            }
+          </ul>
+        </div>
+      }
+
+      <!-- Résultat import -->
+      @if (result() && status() === 'done') {
+        <div class="result-block">
+          <div class="result-item result-item--success">
+            <span class="material-symbols-outlined">check_circle</span>
+            <span>{{ result()!.success }} ligne(s) importée(s) avec succès</span>
+          </div>
+          @if (result()!.errors.length > 0) {
+            <div class="result-item result-item--error">
+              <span class="material-symbols-outlined">error</span>
+              <span>{{ result()!.errors.length }} ligne(s) en erreur</span>
+            </div>
+          }
+        </div>
+      }
+
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="onClose()">Annuler</button>
+      <button
+        class="btn-import"
+        [disabled]="!canImport"
+        (click)="onImport()">
+        <span class="material-symbols-outlined">upload</span>
+        Importer
+      </button>
+    </div>
+
+  </div>
+</div>
