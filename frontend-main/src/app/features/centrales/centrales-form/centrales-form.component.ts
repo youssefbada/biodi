@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, ReactiveFormsModule, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CentralesService } from '../../../core/services/centrales.service';
 import {
@@ -8,6 +8,9 @@ import {
   TYPE_CIRCUIT_OPTIONS,
   TYPE_FILTRATION_OPTIONS,
   PRESSION_NETTOYAGE_OPTIONS,
+  TYPE_TRAITEMENT_CHIMIQUE_OPTIONS,
+  FONCTIONNEMENT_FILTRE_OPTIONS,
+  LOCALISATION_OPTIONS,
 } from '../../../core/constants/centrale.constants';
 
 import { SidebarComponent } from '../../../shared/components/sidebar/sidebar.component';
@@ -17,20 +20,26 @@ import { FieldInputComponent } from '../../../shared/components/field-input/fiel
 import { FieldSelectComponent } from '../../../shared/components/field-select/field-select.component';
 import { FieldToggleComponent } from '../../../shared/components/field-toggle/field-toggle.component';
 
+function integerValidator(control: AbstractControl): ValidationErrors | null {
+  const v = control.value;
+  if (v === null || v === '' || v === undefined) return null;
+  return Number.isInteger(Number(v)) ? null : { integer: true };
+}
+
 @Component({
   selector: 'app-centrales-form',
   standalone: true,
   imports: [
-  CommonModule,
-  ReactiveFormsModule,
-  RouterModule,
-  SidebarComponent,
-  HeaderComponent,
-  SectionHeader,
-  FieldInputComponent,
-  FieldSelectComponent,
-  FieldToggleComponent,
-],
+    CommonModule,
+    ReactiveFormsModule,
+    RouterModule,
+    SidebarComponent,
+    HeaderComponent,
+    SectionHeader,
+    FieldInputComponent,
+    FieldSelectComponent,
+    FieldToggleComponent,
+  ],
   templateUrl: './centrales-form.component.html',
   styleUrl: './centrales-form.component.scss'
 })
@@ -41,9 +50,9 @@ export class CentralesFormComponent implements OnInit {
   private centralesService = inject(CentralesService);
 
   breadcrumbs = [
-  { label: 'Centrales', route: '/centrales' },
-  { label: 'Nouvelle centrale' },
-];
+    { label: 'Centrales', route: '/centrales' },
+    { label: 'Nouvelle centrale' },
+  ];
 
   form!: FormGroup;
   isEdit = false;
@@ -56,6 +65,9 @@ export class CentralesFormComponent implements OnInit {
   circuitOptions = TYPE_CIRCUIT_OPTIONS.filter(o => o.value !== '');
   filtrationOptions = TYPE_FILTRATION_OPTIONS.filter(o => o.value !== '');
   pressionOptions = PRESSION_NETTOYAGE_OPTIONS.filter(o => o.value !== '');
+  traitementOptions = TYPE_TRAITEMENT_CHIMIQUE_OPTIONS;
+  fonctionnementFiltreOptions = FONCTIONNEMENT_FILTRE_OPTIONS.filter(o => o.value !== '');
+  localisationOptions = LOCALISATION_OPTIONS.filter(o => o.value !== '');
 
   ngOnInit(): void {
     this.buildForm();
@@ -79,7 +91,7 @@ export class CentralesFormComponent implements OnInit {
       site_name: ['', Validators.required],
       milieu_type: [''],
       source_froide: [''],
-      nbre_reacteurs: [null],
+      nbre_reacteurs: [null, [integerValidator]],
       puissance_reacteurs_mwe: [null],
       debit_aspire_par_tranche_m3s: [null],
       debit_total_aspire_m3s: [null],
@@ -90,19 +102,19 @@ export class CentralesFormComponent implements OnInit {
       type_circuit: [''],
       type_filtration: [''],
       dimension_filtre_h_l_m: [''],
-      maillage_mm: [null],
+      maillage_mm: [null, [integerValidator]],
       pression_nettoyage: [''],
       traitement_chimique: [null],
       type_traitement_chimique: [''],
       circuits_crf_sec_separes: [null],
       pompes_separees: [null],
       fonctionnement_filtre: [''],
-      temps_moyen_emersion_min: [null],
+      temps_moyen_emersion_min: [null, [integerValidator]],
       systeme_recuperation: [null],
       presence_goulotte: [null],
-      goulotte_hauteur_eau: [null],
+      goulotte_hauteur_eau: [null, [integerValidator]],
       presence_pre_grille: [null],
-      espacement_pre_grille_mm: [null],
+      espacement_pre_grille_mm: [null, [integerValidator]],
 
       // Onglet 3 — Prise d'eau
       presence_canal_amenee: [null],
