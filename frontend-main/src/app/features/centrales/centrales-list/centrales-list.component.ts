@@ -97,36 +97,30 @@ export class CentralesListComponent implements OnInit, OnDestroy {
     this.showImportModal.set(false);
   }
 
-  // ─── Breadcrumb ───
   breadcrumbs: BreadcrumbItem[] = [
     { label: 'Accueil', route: '/' },
     { label: 'Centrales' },
   ];
 
-  // ─── Données ───
   allCentrales: Centrale[] = [];
   centralesFiltrees: Centrale[] = [];
   totalCount = 0;
   isLoading = false;
   errorMessage = '';
 
-  // ─── Filtres ───
   searchTerm = '';
   selectedMilieu = '';
   selectedTypeCircuit = '';
   selectedCanal = 'tous';
 
-  // ─── Pagination ───
   currentPage = 1;
   pageSize = PAGE_SIZE_DEFAULT;
 
-  // ─── Options ───
   milieuOptions = MILIEU_TYPE_OPTIONS;
   typeCircuitOptions = TYPE_CIRCUIT_OPTIONS;
   canalOptions = CANAL_AMENEE_OPTIONS;
   milieuBadgeColors = MILIEU_BADGE_COLORS;
 
-  // ─── Search debounce ───
   private searchSubject = new Subject<string>();
   private destroy$ = new Subject<void>();
 
@@ -297,8 +291,8 @@ export class CentralesListComponent implements OnInit, OnDestroy {
         this.toastService.success('Centrale supprimée avec succès');
       },
       error: (err) => {
+        this.centraleToDelete = null;
         console.error(err);
-        this.toastService.error('Erreur lors de la suppression de la centrale');
       },
     });
   }

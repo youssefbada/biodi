@@ -49,38 +49,31 @@ export class PoissonsListComponent implements OnInit, OnDestroy {
     { label: 'Poissons' },
   ];
 
-  // ─── Données ───
   allPoissons: Poisson[] = [];
   poissonsFiltres: Poisson[] = [];
   totalCount = 0;
   isLoading = false;
   errorMessage = '';
 
-  // ─── Filtres ───
   searchTerm = '';
   selectedGuildeEco = '';
   selectedRepartition = '';
   selectedGuilde = '';
 
-  // ─── Pagination ───
   currentPage = 1;
   pageSize = PAGE_SIZE_DEFAULT;
 
-  // ─── Options ───
   guildeEcoOptions = GUILDE_ECOLOGIQUE_OPTIONS;
   repartitionOptions = REPARTITION_COLONNE_EAU_OPTIONS;
   guildeTrophiqueOptions = GUILDE_TROPHIQUE_OPTIONS;
   badgeColors = POISSON_BADGE_COLORS;
 
-  // ─── Modals ───
   showImportModal = signal(false);
   poissonToDelete: Poisson | null = null;
 
-  // ─── Search debounce ───
   private searchSubject = new Subject<string>();
   private destroy$ = new Subject<void>();
 
-  // ─── Import mappings ───
   poissonColumnMappings: ColumnMapping[] = [
     { excelHeader: 'Famille',             modelField: 'famille',              label: 'Famille',             required: true  },
     { excelHeader: 'Genre',               modelField: 'genre',                label: 'Genre',               required: true  },
@@ -219,8 +212,8 @@ export class PoissonsListComponent implements OnInit, OnDestroy {
         this.toastService.success('Poisson supprimé avec succès');
       },
       error: (err) => {
+        this.poissonToDelete = null;
         console.error(err);
-        this.toastService.error('Erreur lors de la suppression du poisson');
       },
     });
   }
