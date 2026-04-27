@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, signal, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -8,6 +8,7 @@ import { PoissonsService } from '../../../core/services/poissons.service';
 import { Poisson } from '../../../models/poisson.model';
 import { AuthService } from '../../../core/services/auth.service';
 import { ImportService } from '../../../core/services/import.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { SidebarComponent } from '../../../shared/components/sidebar/sidebar.component';
 import { HeaderComponent, BreadcrumbItem } from '../../../shared/components/header/header.component';
 import { ImportModalComponent, ColumnMapping } from '../../../shared/components/import-modal/import-modal.component';
@@ -39,7 +40,7 @@ export class PoissonsListComponent implements OnInit, OnDestroy {
 
   private poissonsService = inject(PoissonsService);
   private importService = inject(ImportService);
-  private cdr = inject(ChangeDetectorRef);
+  private toastService = inject(ToastService);
   router = inject(Router);
   authService = inject(AuthService);
 
@@ -123,8 +124,8 @@ export class PoissonsListComponent implements OnInit, OnDestroy {
     this.poissonsService.getAll().subscribe({
       next: (response) => {
         this.allPoissons = [...response];
-        this.appliquerFiltres();
         this.isLoading = false;
+        this.appliquerFiltres();
       },
       error: (err) => {
         this.errorMessage = 'Erreur lors du chargement des poissons.';
@@ -163,7 +164,6 @@ export class PoissonsListComponent implements OnInit, OnDestroy {
     this.poissonsFiltres = [...resultats];
     this.totalCount = this.poissonsFiltres.length;
     this.currentPage = 1;
-    this.cdr.detectChanges();
   }
 
   get poissonsPage(): Poisson[] {
@@ -194,7 +194,6 @@ export class PoissonsListComponent implements OnInit, OnDestroy {
   goToPage(page: number): void {
     if (page < 1 || page > this.totalPages) return;
     this.currentPage = page;
-    this.cdr.detectChanges();
   }
 
   onSearchChange(): void {
@@ -211,12 +210,18 @@ export class PoissonsListComponent implements OnInit, OnDestroy {
 
   onConfirmDelete(): void {
     if (!this.poissonToDelete) return;
-    this.poissonsService.delete(this.poissonToDelete.id_poisson!).subscribe({
+    const id = this.poissonToDelete.id_poisson!;
+    this.poissonsService.delete(id).subscribe({
       next: () => {
+        this.allPoissons = this.allPoissons.filter(p => p.id_poisson !== id);
         this.poissonToDelete = null;
-        this.loadPoissons();
+        this.appliquerFiltres();
+        this.toastService.success('Poisson supprimé avec succès');
       },
-      error: (err) => console.error(err),
+      error: (err) => {
+        console.error(err);
+        this.toastService.error('Erreur lors de la suppression du poisson');
+      },
     });
   }
 
