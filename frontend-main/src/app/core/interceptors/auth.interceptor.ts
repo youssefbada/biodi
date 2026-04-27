@@ -17,7 +17,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
       const code = error.error?.code || null;
 
-      // 403 : utilisateur non déclaré dans la base applicative
       if (error.status === 403) {
         router.navigate(['/non-connecte'], {
           state: {
@@ -29,20 +28,28 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         return throwError(() => error);
       }
 
-      // ── 401 : session expirée ──
       if (error.status === 401) {
-        router.navigate(['/non-connecte'], {
-          replaceUrl: true,
-        });
+        router.navigate(['/non-connecte'], { replaceUrl: true });
         return throwError(() => error);
       }
 
-      // ── Autres erreurs → toast ──
       let message = 'Une erreur est survenue.';
 
       switch (error.status) {
         case 400:
-          message = detail || 'Données invalides.';
+          if (detail) {
+            message = detail;
+          } else if (error.error && typeof error.error === 'object') {
+            const fields = Object.entries(error.error)
+              .map(([field, errors]) => {
+                const msgs = Array.isArray(errors) ? errors.join(', ') : String(errors);
+                return `• ${field} : ${msgs}`;
+              })
+              .join('\n');
+            message = fields || 'Données invalides.';
+          } else {
+            message = 'Données invalides.';
+          }
           break;
         case 404:
           message = detail || 'Ressource introuvable.';
