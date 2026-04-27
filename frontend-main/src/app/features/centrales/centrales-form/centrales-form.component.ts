@@ -69,6 +69,14 @@ export class CentralesFormComponent implements OnInit {
   fonctionnementFiltreOptions = FONCTIONNEMENT_FILTRE_OPTIONS.filter(o => o.value !== '');
   localisationOptions = LOCALISATION_OPTIONS.filter(o => o.value !== '');
 
+  private readonly intFields = [
+    'nbre_reacteurs',
+    'maillage_mm',
+    'temps_moyen_emersion_min',
+    'goulotte_hauteur_eau',
+    'espacement_pre_grille_mm',
+  ] as const;
+
   ngOnInit(): void {
     this.buildForm();
     const id = this.route.snapshot.paramMap.get('id');
@@ -78,7 +86,14 @@ export class CentralesFormComponent implements OnInit {
       this.loading = true;
       this.breadcrumbs[1].label = 'Modifier la centrale';
       this.centralesService.getById(this.centraleId).subscribe({
-        next: (c) => { this.form.patchValue(c); this.loading = false; },
+        next: (c) => {
+          const patched: any = { ...c };
+          for (const f of this.intFields) {
+            patched[f] = c[f] != null ? String(c[f]) : null;
+          }
+          this.form.patchValue(patched);
+          this.loading = false;
+        },
         error: () => { this.loading = false; }
       });
     }
@@ -134,7 +149,11 @@ export class CentralesFormComponent implements OnInit {
     this.form.markAllAsTouched();
     if (this.form.invalid) return;
     this.saving = true;
-    const data = this.form.getRawValue();
+    const raw = this.form.getRawValue();
+    const data: any = { ...raw };
+    for (const f of this.intFields) {
+      data[f] = raw[f] != null && raw[f] !== '' ? Number(raw[f]) : null;
+    }
 
     const obs = this.isEdit && this.centraleId
       ? this.centralesService.update(this.centraleId, data)

@@ -92,7 +92,7 @@
                     <app-field-select label="Type de circuit" controlName="type_circuit" [formGroup]="form" [editing]="true" [options]="circuitOptions"></app-field-select>
                     <app-field-select label="Fonctionnement filtre" controlName="fonctionnement_filtre" [formGroup]="form" [editing]="true" [options]="fonctionnementFiltreOptions"></app-field-select>
                     <app-field-toggle label="Système de récupération" controlName="systeme_recuperation" [formGroup]="form" [editing]="true" description="Système de récupération des organismes"></app-field-toggle>
-                    <app-field-toggle label="Pompes séparées" controlName="pompes_separees" [formGroup]="true" [editing]="true" description="Pompes dédiées par circuit"></app-field-toggle>
+                    <app-field-toggle label="Pompes séparées" controlName="pompes_separees" [formGroup]="form" [editing]="true" description="Pompes dédiées par circuit"></app-field-toggle>
                     <app-field-toggle label="Circuits CRF sec séparés" controlName="circuits_crf_sec_separes" [formGroup]="form" [editing]="true"></app-field-toggle>
                   </div>
                 </div>
