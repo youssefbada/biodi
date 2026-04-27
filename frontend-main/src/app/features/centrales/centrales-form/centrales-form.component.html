@@ -10,7 +10,6 @@
         <div class="skeleton-header"></div>
       } @else {
 
-        <!-- Header -->
         <div class="detail-header">
           <div class="detail-header__left">
             <div class="detail-header__title-row">
@@ -38,16 +37,15 @@
           </div>
         </div>
 
-        <!-- Tabs -->
         <nav class="tab-bar">
           <button class="tab-btn" [class.active]="activeTab === 'site'" (click)="setTab('site')">
-            Caractéristiques du site & CNPE
+            Caractéristiques du site &amp; CNPE
           </button>
           <button class="tab-btn" [class.active]="activeTab === 'circuit'" (click)="setTab('circuit')">
             Circuit de refroidissement
           </button>
           <button class="tab-btn" [class.active]="activeTab === 'prise_eau'" (click)="setTab('prise_eau')">
-            Prise d'eau & rejet
+            Prise d'eau &amp; rejet
           </button>
           <button class="tab-btn" [class.active]="activeTab === 'courantologie'" (click)="setTab('courantologie')">
             Courantologie
@@ -72,7 +70,7 @@
                 <div class="column">
                   <app-section-header title="Données techniques"></app-section-header>
                   <div class="fields-stack">
-                    <app-field-input label="Nombre de réacteurs" controlName="nbre_reacteurs" [formGroup]="form" [editing]="true" type="number"></app-field-input>
+                    <app-field-input label="Nombre de réacteurs" controlName="nbre_reacteurs" [formGroup]="form" [editing]="true" type="text" inputmode="numeric"></app-field-input>
                     <app-field-input label="Puissance installée" controlName="puissance_reacteurs_mwe" [formGroup]="form" [editing]="true" type="number" unit="MWe"></app-field-input>
                     <app-field-input label="Débit aspiré par tranche" controlName="debit_aspire_par_tranche_m3s" [formGroup]="form" [editing]="true" type="number" unit="m³/s"></app-field-input>
                     <app-field-input label="Débit total aspiré" controlName="debit_total_aspire_m3s" [formGroup]="form" [editing]="true" type="number" unit="m³/s"></app-field-input>
@@ -81,7 +79,7 @@
                 </div>
               </div>
               <div class="full-width-field">
-                <app-field-input label="Notes & Observations" controlName="notes" [formGroup]="form" [editing]="true" type="textarea"></app-field-input>
+                <app-field-input label="Notes &amp; Observations" controlName="notes" [formGroup]="form" [editing]="true" type="textarea"></app-field-input>
               </div>
             }
 
@@ -92,22 +90,22 @@
                   <app-section-header title="Caractéristiques Générales"></app-section-header>
                   <div class="fields-stack">
                     <app-field-select label="Type de circuit" controlName="type_circuit" [formGroup]="form" [editing]="true" [options]="circuitOptions"></app-field-select>
-                    <app-field-input label="Fonctionnement filtre" controlName="fonctionnement_filtre" [formGroup]="form" [editing]="true"></app-field-input>
+                    <app-field-select label="Fonctionnement filtre" controlName="fonctionnement_filtre" [formGroup]="form" [editing]="true" [options]="fonctionnementFiltreOptions"></app-field-select>
                     <app-field-toggle label="Système de récupération" controlName="systeme_recuperation" [formGroup]="form" [editing]="true" description="Système de récupération des organismes"></app-field-toggle>
-                    <app-field-toggle label="Pompes séparées" controlName="pompes_separees" [formGroup]="form" [editing]="true" description="Pompes dédiées par circuit"></app-field-toggle>
+                    <app-field-toggle label="Pompes séparées" controlName="pompes_separees" [formGroup]="true" [editing]="true" description="Pompes dédiées par circuit"></app-field-toggle>
                     <app-field-toggle label="Circuits CRF sec séparés" controlName="circuits_crf_sec_separes" [formGroup]="form" [editing]="true"></app-field-toggle>
                   </div>
                 </div>
                 <div class="column">
-                  <app-section-header title="Filtration & Tambours"></app-section-header>
+                  <app-section-header title="Filtration &amp; Tambours"></app-section-header>
                   <div class="fields-stack">
                     <app-field-select label="Type de filtration" controlName="type_filtration" [formGroup]="form" [editing]="true" [options]="filtrationOptions"></app-field-select>
-                    <app-field-input label="Maille des tambours" controlName="maillage_mm" [formGroup]="form" [editing]="true" type="number" unit="mm"></app-field-input>
+                    <app-field-input label="Maille des tambours" controlName="maillage_mm" [formGroup]="form" [editing]="true" type="text" inputmode="numeric" unit="mm"></app-field-input>
                     <app-field-input label="Dimension filtre H×L" controlName="dimension_filtre_h_l_m" [formGroup]="form" [editing]="true" unit="m"></app-field-input>
                     <app-field-select label="Pression de nettoyage" controlName="pression_nettoyage" [formGroup]="form" [editing]="true" [options]="pressionOptions"></app-field-select>
-                    <app-field-input label="Temps moyen émersion" controlName="temps_moyen_emersion_min" [formGroup]="form" [editing]="true" type="number" unit="min"></app-field-input>
+                    <app-field-input label="Temps moyen émersion" controlName="temps_moyen_emersion_min" [formGroup]="form" [editing]="true" type="text" inputmode="numeric" unit="min"></app-field-input>
                     <app-field-toggle label="Traitement chimique" controlName="traitement_chimique" [formGroup]="form" [editing]="true"></app-field-toggle>
-                    <app-field-input label="Type de traitement chimique" controlName="type_traitement_chimique" [formGroup]="form" [editing]="true"></app-field-input>
+                    <app-field-select label="Type de traitement chimique" controlName="type_traitement_chimique" [formGroup]="form" [editing]="true" [options]="traitementOptions"></app-field-select>
                   </div>
                 </div>
               </div>
@@ -116,14 +114,14 @@
                   <app-section-header title="Pré-grille"></app-section-header>
                   <div class="fields-stack">
                     <app-field-toggle label="Présence pré-grille" controlName="presence_pre_grille" [formGroup]="form" [editing]="true"></app-field-toggle>
-                    <app-field-input label="Espacement pré-grille" controlName="espacement_pre_grille_mm" [formGroup]="form" [editing]="true" type="number" unit="mm"></app-field-input>
+                    <app-field-input label="Espacement pré-grille" controlName="espacement_pre_grille_mm" [formGroup]="form" [editing]="true" type="text" inputmode="numeric" unit="mm"></app-field-input>
                   </div>
                 </div>
                 <div class="column">
                   <app-section-header title="Goulotte"></app-section-header>
                   <div class="fields-stack">
                     <app-field-toggle label="Présence goulotte" controlName="presence_goulotte" [formGroup]="form" [editing]="true"></app-field-toggle>
-                    <app-field-input label="Goulotte hauteur eau" controlName="goulotte_hauteur_eau" [formGroup]="form" [editing]="true" type="number" unit="m"></app-field-input>
+                    <app-field-input label="Goulotte hauteur eau" controlName="goulotte_hauteur_eau" [formGroup]="form" [editing]="true" type="text" inputmode="numeric" unit="m"></app-field-input>
                   </div>
                 </div>
               </div>
@@ -136,13 +134,13 @@
                   <app-section-header title="Prise d'eau"></app-section-header>
                   <div class="fields-stack">
                     <app-field-toggle label="Présence canal d'amenée" controlName="presence_canal_amenee" [formGroup]="form" [editing]="true"></app-field-toggle>
-                    <app-field-input label="Localisation prise d'eau" controlName="localisation_prise_eau" [formGroup]="form" [editing]="true"></app-field-input>
+                    <app-field-select label="Localisation prise d'eau" controlName="localisation_prise_eau" [formGroup]="form" [editing]="true" [options]="localisationOptions"></app-field-select>
                   </div>
                 </div>
                 <div class="column">
                   <app-section-header title="Rejet"></app-section-header>
                   <div class="fields-stack">
-                    <app-field-input label="Localisation rejet d'eau" controlName="localisation_rejet_eau" [formGroup]="form" [editing]="true"></app-field-input>
+                    <app-field-select label="Localisation rejet d'eau" controlName="localisation_rejet_eau" [formGroup]="form" [editing]="true" [options]="localisationOptions"></app-field-select>
                     <app-field-input label="Profondeur rejet eau" controlName="profondeur_rejet_eau_m" [formGroup]="form" [editing]="true" type="number" unit="m"></app-field-input>
                     <app-field-input label="Distance côte rejet eau" controlName="distance_cote_rejet_eau_m" [formGroup]="form" [editing]="true" type="number" unit="m"></app-field-input>
                     <app-field-input label="Volume eau rejetée" controlName="volume_eau_rejetee_m3s" [formGroup]="form" [editing]="true" type="number" unit="m³/s"></app-field-input>

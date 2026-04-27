@@ -1,7 +1,7 @@
 // src/app/shared/components/field-input/field-input.component.ts
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormGroup, AbstractControl, FormControl } from '@angular/forms';
+import { ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
 
 @Component({
   selector: 'app-field-input',
@@ -16,6 +16,7 @@ export class FieldInputComponent {
   @Input() formGroup!: FormGroup;
   @Input() editing = false;
   @Input() type: 'text' | 'number' | 'textarea' = 'text';
+  @Input() inputmode = '';
   @Input() placeholder = '';
   @Input() unit = '';
   @Input() required = false;

@@ -26,6 +26,7 @@
           [type]="type"
           [formControl]="control"
           [placeholder]="placeholder"
+          [attr.inputmode]="inputmode || null"
         />
         @if (unit) {
           <span class="input-unit" [class.input-unit--error]="showError">{{ unit }}</span>
