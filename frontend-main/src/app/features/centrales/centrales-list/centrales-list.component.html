@@ -157,7 +157,7 @@
                     </td>
                     <td class="td-secondary">{{ centrale.type_circuit || '—' }}</td>
                     <td class="text-right td-actions">
-                      <div class="actions-group">
+                      <div class="actions-group" (click)="$event.stopPropagation()">
                         <button
                           class="action-btn action-btn--view"
                           title="Voir"

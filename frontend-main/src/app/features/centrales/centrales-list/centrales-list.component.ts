@@ -1,10 +1,11 @@
-import { Component, OnInit, OnDestroy, inject, signal, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { CentralesService } from '../../../core/services/centrales.service';
 import { ImportService } from '../../../core/services/import.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { Centrale } from '../../../models/centrale.model';
 import { SidebarComponent } from '../../../shared/components/sidebar/sidebar.component';
 import { HeaderComponent, BreadcrumbItem } from '../../../shared/components/header/header.component';
@@ -18,6 +19,7 @@ import { PAGE_SIZE_DEFAULT } from '../../../core/constants/app.constants';
 import { ImportModalComponent, ColumnMapping } from '../../../shared/components/import-modal/import-modal.component';
 import { ConfirmDeleteModalComponent } from '../../../shared/components/confirm-delete-modal/confirm-delete-modal.component';
 import { AuthService } from '../../../core/services/auth.service';
+
 @Component({
   selector: 'app-centrales-list',
   standalone: true,
@@ -35,9 +37,13 @@ import { AuthService } from '../../../core/services/auth.service';
 })
 export class CentralesListComponent implements OnInit, OnDestroy {
 
-    router = inject(Router);
-    authService = inject(AuthService);
-    centraleColumnMappings: ColumnMapping[] = [
+  router = inject(Router);
+  authService = inject(AuthService);
+  private centralesService = inject(CentralesService);
+  private importService = inject(ImportService);
+  private toastService = inject(ToastService);
+
+  centraleColumnMappings: ColumnMapping[] = [
     { excelHeader: 'Site',                          modelField: 'site_name',                    label: 'Site',                        required: true  },
     { excelHeader: 'Code',                          modelField: 'code_nom',                     label: 'Code',                        required: true  },
     { excelHeader: 'Milieu',                        modelField: 'milieu_type',                  label: 'Milieu',                      required: false },
@@ -72,28 +78,24 @@ export class CentralesListComponent implements OnInit, OnDestroy {
     { excelHeader: 'Température rejet (°C)',        modelField: 'temperature_rejet_c',          label: 'Température rejet',           required: false },
     { excelHeader: 'Température milieu (°C)',       modelField: 'temperature_milieu_c',         label: 'Température milieu',          required: false },
     { excelHeader: 'Delta T (°C)',                  modelField: 'delta_t_c',                    label: 'Delta T',                     required: false },
-    ];
+  ];
 
-    showImportModal = signal(false);
+  showImportModal = signal(false);
 
-    private cdr = inject(ChangeDetectorRef);
+  createCentraleFn = (row: any) => this.centralesService.create(row);
 
-    createCentraleFn = (row: any) => this.centralesService.create(row);
-
-    onImportDone(result: any): void {
+  onImportDone(result: any): void {
     this.showImportModal.set(false);
     this.loadCentrales();
-    }
-    onOpenImport(): void {
-  this.showImportModal.set(true);
-}
+  }
 
-onCloseImport(): void {
-  this.showImportModal.set(false);
-}
+  onOpenImport(): void {
+    this.showImportModal.set(true);
+  }
 
-  private centralesService = inject(CentralesService);
-  private importService = inject(ImportService)
+  onCloseImport(): void {
+    this.showImportModal.set(false);
+  }
 
   // ─── Breadcrumb ───
   breadcrumbs: BreadcrumbItem[] = [
@@ -136,7 +138,6 @@ onCloseImport(): void {
     ).subscribe(() => {
       this.appliquerFiltres();
     });
-
     this.loadCentrales();
   }
 
@@ -145,16 +146,14 @@ onCloseImport(): void {
     this.destroy$.complete();
   }
 
-  // ─── Chargement initial ───
   loadCentrales(): void {
     this.isLoading = true;
     this.errorMessage = '';
-
     this.centralesService.getAll().subscribe({
       next: (response) => {
         this.allCentrales = response;
-        this.appliquerFiltres();
         this.isLoading = false;
+        this.appliquerFiltres();
       },
       error: (err) => {
         this.errorMessage = 'Erreur lors du chargement des centrales.';
@@ -164,15 +163,12 @@ onCloseImport(): void {
     });
   }
 
-  // ─── Filtres côté Angular ───
   appliquerFiltres(): void {
     let resultats = [...this.allCentrales];
 
-    // Recherche
-    // Recherche dans tous les champs du tableau
     if (this.searchTerm.trim()) {
-    const terme = this.searchTerm.toLowerCase().trim();
-    resultats = resultats.filter(c =>
+      const terme = this.searchTerm.toLowerCase().trim();
+      resultats = resultats.filter(c =>
         c.site_name?.toLowerCase().includes(terme) ||
         c.code_nom?.toLowerCase().includes(terme) ||
         c.milieu_type?.toLowerCase().includes(terme) ||
@@ -180,20 +176,17 @@ onCloseImport(): void {
         c.type_circuit?.toLowerCase().includes(terme) ||
         c.nbre_reacteurs?.toString().includes(terme) ||
         c.puissance_reacteurs_mwe?.toString().includes(terme)
-    );
+      );
     }
 
-    // Milieu
     if (this.selectedMilieu) {
       resultats = resultats.filter(c => c.milieu_type === this.selectedMilieu);
     }
 
-    // Type circuit
     if (this.selectedTypeCircuit) {
       resultats = resultats.filter(c => c.type_circuit === this.selectedTypeCircuit);
     }
 
-    // Canal amenée
     if (this.selectedCanal === 'oui') {
       resultats = resultats.filter(c => c.presence_canal_amenee === true);
     } else if (this.selectedCanal === 'non') {
@@ -203,10 +196,8 @@ onCloseImport(): void {
     this.centralesFiltrees = [...resultats];
     this.totalCount = this.centralesFiltrees.length;
     this.currentPage = 1;
-    this.cdr.detectChanges();
   }
 
-  // ─── Pagination locale ───
   get centralesPage(): Centrale[] {
     const start = (this.currentPage - 1) * this.pageSize;
     return this.centralesFiltrees.slice(start, start + this.pageSize);
@@ -227,10 +218,8 @@ onCloseImport(): void {
   goToPage(page: number): void {
     if (page < 1 || page > this.totalPages) return;
     this.currentPage = page;
-    this.cdr.detectChanges(); // ← ajouter
   }
 
-  // ─── Events filtres ───
   onSearchChange(): void {
     this.searchSubject.next(this.searchTerm);
   }
@@ -244,45 +233,40 @@ onCloseImport(): void {
     this.appliquerFiltres();
   }
 
+  onExportCsv(): void {
+    this.centralesService.exportExcel(this.centralesFiltrees);
+  }
 
-onExportCsv(): void {
- this.centralesService.exportExcel(this.centralesFiltrees);
-}
+  onDownloadTemplate(): void {
+    this.centralesService.downloadTemplate();
+  }
 
-onDownloadTemplate(): void {
- this.centralesService.downloadTemplate();
-}
-
-async onImport(event: Event): Promise<void> {
- const input = event.target as HTMLInputElement;
- if (!input.files?.length) return;
-
- const file = input.files[0];
- const validation = this.importService.validateFile(file);
-
- if (!validation.valid) {
-  this.errorMessage = validation.error || 'Fichier invalide';
-  return;
- }
-
- this.isLoading = true;
- const import$ = await this.centralesService.importFile(file);
-
- import$.subscribe({
-  next: (result) => {
-   this.isLoading = false;
-   if (result.errors.length > 0) {
-    this.errorMessage = `${result.success}/${result.total} lignes importées. ${result.errors.length} erreurs.`;
-   }
-   this.loadCentrales();
-  },
-  error: (err) => {
-   this.isLoading = false;
-   this.errorMessage = 'Erreur lors de l\'import';
-   console.error(err);
-  },
- });
-}
+  async onImport(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+    const file = input.files[0];
+    const validation = this.importService.validateFile(file);
+    if (!validation.valid) {
+      this.errorMessage = validation.error || 'Fichier invalide';
+      return;
+    }
+    this.isLoading = true;
+    const import$ = await this.centralesService.importFile(file);
+    import$.subscribe({
+      next: (result) => {
+        this.isLoading = false;
+        if (result.errors.length > 0) {
+          this.errorMessage = `${result.success}/${result.total} lignes importées. ${result.errors.length} erreurs.`;
+        }
+        this.loadCentrales();
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.errorMessage = 'Erreur lors de l\'import';
+        console.error(err);
+      },
+    });
+  }
 
   getBadgeClass(milieu: string): string {
     return this.milieuBadgeColors[milieu] || 'badge-default';
@@ -298,22 +282,28 @@ async onImport(event: Event): Promise<void> {
 
   centraleToDelete: Centrale | null = null;
 
-onDelete(centrale: Centrale): void {
-  this.centraleToDelete = centrale;
-}
+  onDelete(centrale: Centrale): void {
+    this.centraleToDelete = centrale;
+  }
 
-onConfirmDelete(): void {
-  if (!this.centraleToDelete) return;
-  this.centralesService.delete(this.centraleToDelete.id!).subscribe({
-    next: () => {
-      this.centraleToDelete = null;
-      this.loadCentrales();
-    },
-    error: (err) => console.error(err),
-  });
-}
+  onConfirmDelete(): void {
+    if (!this.centraleToDelete) return;
+    const id = this.centraleToDelete.id!;
+    this.centralesService.delete(id).subscribe({
+      next: () => {
+        this.allCentrales = this.allCentrales.filter(c => c.id !== id);
+        this.centraleToDelete = null;
+        this.appliquerFiltres();
+        this.toastService.success('Centrale supprimée avec succès');
+      },
+      error: (err) => {
+        console.error(err);
+        this.toastService.error('Erreur lors de la suppression de la centrale');
+      },
+    });
+  }
 
-onCancelDelete(): void {
-  this.centraleToDelete = null;
-}
+  onCancelDelete(): void {
+    this.centraleToDelete = null;
+  }
 }
