@@ -36,8 +36,10 @@ export class FieldInputComponent {
     if (this.serverError) return this.serverError;
     if (!this.control || !this.control.errors) return '';
     if (this.control.errors['required']) return `${this.label} est obligatoire`;
+    if (this.control.errors['integer']) return `${this.label} doit être un nombre entier (sans décimale)`;
     if (this.control.errors['min']) return `La valeur minimale est ${this.control.errors['min'].min}`;
     if (this.control.errors['max']) return `La valeur maximale est ${this.control.errors['max'].max}`;
+    if (this.control.errors['pattern']) return `${this.label} est invalide`;
     return 'Champ invalide';
   }
 

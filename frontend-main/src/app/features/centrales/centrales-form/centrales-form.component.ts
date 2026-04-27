@@ -86,7 +86,6 @@ export class CentralesFormComponent implements OnInit {
 
   buildForm(): void {
     this.form = this.fb.group({
-      // Onglet 1 — Site & CNPE
       code_nom: ['', Validators.required],
       site_name: ['', Validators.required],
       milieu_type: [''],
@@ -98,7 +97,6 @@ export class CentralesFormComponent implements OnInit {
       taux_disponibilite_moyen_tranches: [''],
       notes: [''],
 
-      // Onglet 2 — Circuit
       type_circuit: [''],
       type_filtration: [''],
       dimension_filtre_h_l_m: [''],
@@ -116,7 +114,6 @@ export class CentralesFormComponent implements OnInit {
       presence_pre_grille: [null],
       espacement_pre_grille_mm: [null, [integerValidator]],
 
-      // Onglet 3 — Prise d'eau
       presence_canal_amenee: [null],
       localisation_prise_eau: [''],
       localisation_rejet_eau: [''],
@@ -134,6 +131,7 @@ export class CentralesFormComponent implements OnInit {
   }
 
   onSubmit(): void {
+    this.form.markAllAsTouched();
     if (this.form.invalid) return;
     this.saving = true;
     const data = this.form.getRawValue();
